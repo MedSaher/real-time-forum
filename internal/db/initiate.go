@@ -9,14 +9,18 @@ import (
 
 // Schema definition:
 const schema = `
-CREATE TABLE IF NOT EXISTS User (
-    ID INTEGER PRIMARY KEY AUTOINCREMENT,
-    FirstName TEXT NOT NULL,
-    LastName TEXT NOT NULL,
-    Email TEXT NOT NULL UNIQUE,
-    PasswordHash TEXT NOT NULL,
-    ProfilePicture TEXT
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nickname TEXT NOT NULL UNIQUE,
+    age INTEGER CHECK(age >= 0),
+    gender TEXT CHECK(gender IN ('male', 'female', 'other')),
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
 CREATE TABLE IF NOT EXISTS Category (
     ID INTEGER PRIMARY KEY AUTOINCREMENT,
     Name TEXT NOT NULL,

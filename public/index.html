@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Weroom - Home</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/public/css/index.css">
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    rel="stylesheet"
+  />
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <div class="navbar">
+    <div class="brand"><i class="fa-solid fa-comments"></i> Weroom</div>
+    <div class="user-info">
+      <span><i class="fa-solid fa-user"></i> Saher</span>
+      <button><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+    </div>
+  </div>
+
+  <!-- MAIN LAYOUT -->
+  <div class="layout">
+    <!-- SIDEBAR USERS -->
+    <div class="sidebar">
+      <h3>Users</h3>
+      <ul class="user-list">
+        <li><i class="fa-solid fa-circle-user"></i> Ryad</li>
+        <li><i class="fa-solid fa-circle-user"></i> Mariam</li>
+        <li><i class="fa-solid fa-circle-user"></i> Walid</li>
+        <li><i class="fa-solid fa-circle-user"></i> Amina</li>
+      </ul>
+    </div>
+
+    <!-- POSTS MAIN CONTENT -->
+    <div class="main-content">
+      <div class="post">
+        <h4>Ryad</h4>
+        <p>Does anyone know how to optimize a SQLite3 query with JOINs?</p>
+      </div>
+      <div class="post">
+        <h4>Saher</h4>
+        <p>Check out my new malware analysis tool written in C++ 🔥</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAT BOX -->
+  <div class="chat-box">
+    <div class="chat-header">
+      <i class="fa-solid fa-comment-dots"></i> Messages
+    </div>
+    <div class="chat-messages">
+      <p><strong>Ryad:</strong> Hello!</p>
+      <p><strong>You:</strong> Hey, what's up?</p>
+    </div>
+    <div class="chat-input">
+      <input type="text" placeholder="Type a message..." />
+      <button><i class="fa-solid fa-paper-plane"></i></button>
+    </div>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Weroom - Login / Register</title>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="/public/css/register.css">
+
+  <style>
+  
+  </style>
+</head>
+
+<body>
+  <!-- LOGIN FORM -->
+  <div class="container">
+    <h1>Weroom Login</h1>
+    <form id="login-form">
+      <div class="form-group">
+        <label for="login-identifier">Email or Nickname</label>
+        <input type="text" id="login-identifier" name="identifier" placeholder="Email or Nickname" required />
+        <i class="fa-solid fa-user icon"></i>
+      </div>
+
+      <div class="form-group">
+        <label for="login-password">Password</label>
+        <input type="password" id="login-password" name="password" placeholder="Password" required />
+        <i class="fa-solid fa-lock icon"></i>
+      </div>
+
+      <button type="submit" id="loginBtn">Login</button>
+    </form>
+    <p class="switch">
+      Don't have an account?
+      <button type="button" onclick="showRegister()">Register here</button>
+    </p>
+  </div>
+
+  <!-- REGISTER FORM -->
+  <div class="container" id="register-form" style="display:none;">
+    <h1>Weroom Register</h1>
+    <form>
+      <div class="form-group">
+        <label for="register-nickname">Nickname</label>
+        <input type="text" id="register-nickname" name="nickname" placeholder="Choose a nickname" required />
+        <i class="fa-solid fa-user icon"></i>
+      </div>
+
+      <div class="form-group">
+        <label for="register-age">Age</label>
+        <input type="number" id="register-age" name="age" min="13" max="120" placeholder="Your age" required />
+        <i class="fa-solid fa-calendar icon"></i>
+      </div>
+
+      <div class="form-group">
+        <label for="register-gender">Gender</label>
+        <select id="register-gender" name="gender" required>
+          <option value="" disabled selected>Select your gender</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="register-firstname">First Name</label>
+        <input type="text" id="register-firstname" name="first_name" placeholder="Your first name" required />
+        <i class="fa-solid fa-id-card icon"></i>
+      </div>
+
+      <div class="form-group">
+        <label for="register-lastname">Last Name</label>
+        <input type="text" id="register-lastname" name="last_name" placeholder="Your last name" required />
+        <i class="fa-solid fa-id-card icon"></i>
+      </div>
+
+      <div class="form-group">
+        <label for="register-email">Email</label>
+        <input type="email" id="register-email" name="email" placeholder="Your email" required />
+        <i class="fa-solid fa-envelope icon"></i>
+      </div>
+
+      <div class="form-group">
+        <label for="register-password">Password</label>
+        <input type="password" id="register-password" name="password" placeholder="Choose a password" required />
+        <i class="fa-solid fa-lock icon"></i>
+      </div>
+
+      <button type="submit">Register</button>
+    </form>
+    <p class="switch">
+      Already have an account?
+      <button type="button" onclick="showLogin()">Login here</button>
+    </p>
+  </div>
+
+  <script src="/public/js/switch.js"></script>
+  <script src="/public/js/login.js"></script>
+</body>
+
+</html>
