@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"net/http"
 	"real-time/internal/auth"
+	"real-time/internal/post"
 )
 
 // SetupRoutes initializes and returns the HTTP router with all API routes registered.
@@ -29,6 +30,14 @@ func SetupRoutes(db *sql.DB) *http.ServeMux {
 	mux.HandleFunc("/api/login", authHandler.LoginHandler)
 	mux.HandleFunc("/auth", authHandler.FormHandler)
 	mux.HandleFunc("/", authHandler.MainHandler)
+
+	// Initialize the post layer components
+	postRepo := post.NewPostRepository(db)
+	postService := post.NewService(postRepo)
+	postHandler := post.NewHandler(postService)
+
+	// Post routes
+	mux.HandleFunc("/api/add_post", postHandler.CreatePost)
 
 	// Other module routes would be registered similarly
 	// mux.HandleFunc("/api/posts", postsHandler.PostsHandler)
