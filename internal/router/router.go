@@ -25,6 +25,7 @@ func SetupRoutes(db *sql.DB) *http.ServeMux {
 
 	// Auth routes
 	mux.HandleFunc("/api/register", authHandler.RegisterHandler)
+	mux.HandleFunc("/api/session", authHandler.LoggedInHandler)
 	mux.HandleFunc("/api/login", authHandler.LoginHandler)
 	mux.HandleFunc("/auth", authHandler.FormHandler)
 	mux.HandleFunc("/", authHandler.MainHandler)

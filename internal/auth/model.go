@@ -6,7 +6,7 @@ import "time"
 type User struct {
     ID           string    // UUID
     Nickname     string
-    Age          int
+    Age          string
     Gender       string
     FirstName    string
     LastName     string
@@ -18,12 +18,12 @@ type User struct {
 // RegisterInput is the expected data from a registration request.
 type RegisterInput struct {
     Nickname  string `json:"nickname"`
-    Age       int    `json:"age"`
+    Age       string    `json:"age"`
     Gender    string `json:"gender"`
     FirstName string `json:"first_name"`
     LastName  string `json:"last_name"`
     Email     string `json:"email"`
-    Password  string `json:"password_hash"`
+    Password  string `json:"password"`
 }
 
 // LoginInput contains data needed to authenticate a user.

@@ -1,6 +1,6 @@
 loginForm = document.getElementById("login-form")
 
-loginForm.addEventListener("submit", async (e)=>{
+loginForm.addEventListener("submit", async (e) => {
 
     e.preventDefault()
 
@@ -8,7 +8,7 @@ loginForm.addEventListener("submit", async (e)=>{
     const password = document.getElementById("login-password").value.trim()
 
     login(identifier, password)
-    
+
 })
 
 async function login(identifier, password) {
@@ -26,20 +26,33 @@ async function login(identifier, password) {
         });
 
         if (response.ok) {
-            const data = await response.json();
-
-            // Store token in localStorage
-            localStorage.setItem("session_token", data.session_token);
-            console.log(data);
-            
             // Redirect to home page
-            // window.location.href = "/";
+            window.location.href = "/";
         } else {
-            const error = await response.text();
-            alert("Login failed: " + error);
+            const modal = document.getElementById('popup-modal');
+            const icon = document.getElementById('modal-icon');
+            const text = document.getElementById('modal-message');
+
+            const error = await response.json();
+
+            modal.className = 'modal error'
+            icon.className = 'fa-solid fa-triangle-exclamation'
+            text.textContent = error.error
+
+            modal.style.display = 'flex';
+
+            console.log(error.error)
+
+            setTimeout(() => {
+                closeModal();
+            }, 3000); // auto-close after 3 seconds
         }
     } catch (error) {
         console.error("Login error:", error);
         alert("Network error.");
     }
 }
+
+function closeModal() {
+    document.getElementById('popup-modal').style.display = 'none';
+  }

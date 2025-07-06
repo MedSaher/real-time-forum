@@ -93,7 +93,7 @@
       transition: background-color 0.3s ease;
     }
 
-    button:hover {
+    .form-group button:hover {
       background-color: #7a372b;
     }
 
@@ -118,6 +118,70 @@
 .switch button:hover {
   opacity: 0.8;
 }
+
+/* MODAL STYLES */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 46px 80px;
+  border-radius: 10px;
+  text-align: center;
+  max-width: 400px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  position: relative;
+  border-top: 6px solid;
+}
+
+.modal.success .modal-content {
+  border-color: #4CAF50;
+}
+
+.modal.error .modal-content {
+  border-color: #E74C3C;
+}
+
+.modal i {
+  font-size: 36px;
+  margin-bottom: 10px;
+}
+
+.modal.success i {
+  color: #4CAF50;
+}
+
+.modal.error i {
+  color: #E74C3C;
+}
+
+.modal-message {
+  font-size: 16px;
+  color: #333;
+}
+
+.modal-close {
+  position: absolute;
+  top: 0;
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #888;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+
 
     /* Responsive */
     @media (max-width: 480px) {

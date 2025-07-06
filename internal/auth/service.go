@@ -10,7 +10,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -23,26 +22,28 @@ func NewService(repo UserRepository) *Service {
 }
 
 // Register a new user after validating inputs and hashing password.
-func (s *Service) Register(input RegisterInput) error {
+func (s *Service) Register(input RegisterInput) (string, error) {
 	// Basic validation (can be expanded)
 	if input.Nickname == "" || input.Email == "" || input.Password == "" {
-		return errors.New("nickname, email and password are required")
+		return "", errors.New("nickname, email and password are required")
+	}
+	if strings.Contains(input.Nickname, " ") || strings.Contains(input.Email, " ") || !strings.Contains(input.Email, "@") {
+		return "", errors.New("invalid nickname or email")
 	}
 	// Check if user already exists
 	if _, err := s.repo.FindByEmail(input.Email); err == nil {
-		return errors.New("email already registered")
+		return "", errors.New("email already registered")
 	}
 	if _, err := s.repo.FindByNickname(input.Nickname); err == nil {
-		return errors.New("nickname already taken")
+		return "", errors.New("nickname already taken")
 	}
 
 	// Hash password
 	hashed, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return err
+		return "", err
 	}
 	user := &User{
-		ID:           uuid.NewString(),
 		Nickname:     input.Nickname,
 		Age:          input.Age,
 		Gender:       input.Gender,
@@ -52,7 +53,23 @@ func (s *Service) Register(input RegisterInput) error {
 		PasswordHash: string(hashed),
 	}
 
-	return s.repo.CreateUser(user)
+	if err = s.repo.CreateUser(user); err != nil {
+		return "", nil
+	}
+	token, err := s.GenerateToken(user.ID)
+
+	if err != nil {
+		return "", err
+	}
+
+	token, err = s.repo.CreateSession(token, user.ID)
+
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
+
 }
 
 // Authenticate user by identifier (email or nickname) and password
@@ -81,6 +98,7 @@ func (s *Service) Login(input *LoginInput) (string, error) {
 
 	return token, nil
 }
+
 
 
 func (s *Service) GenerateToken(userId string) (string, error) {
