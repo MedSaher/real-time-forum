@@ -2,7 +2,6 @@ package post
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 )
 
@@ -20,14 +19,12 @@ func (s *Service) AddPost(post *Post) (*PostDTO, error) {
 	content := strings.TrimSpace(post.Content)
 	categories := post.Categories // Retrieves multiple values
 	if title == "" || content == "" {
-		fmt.Println("here 1")
 		return nil, errors.New("please fill in all the fields")
 	}
 
 	for _, cat := range categories {
 		cat = strings.TrimSpace(cat)
 		if cat == "" {
-			fmt.Println("here 2")
 
 			return nil, errors.New("please fill in all the fields")
 		}
@@ -35,8 +32,7 @@ func (s *Service) AddPost(post *Post) (*PostDTO, error) {
 
 	postDTO, err := s.repo.CreatePost(post)
 	if err != nil {
-		fmt.Println("here 3")
-
+		return nil, err
 	}
 	return postDTO, nil
 }

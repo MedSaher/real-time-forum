@@ -9,6 +9,11 @@ type Hub struct {
 	Broadcast  chan []byte
 }
 
+type Message struct {
+	Type string      `json:"type"` // e.g. "new_post"
+	Data interface{} `json:"data"` // e.g. postDTO
+}
+
 func NewHub() *Hub {
 	return &Hub{
 		Clients:    make(map[string]*Client),
@@ -24,7 +29,7 @@ func (h *Hub) Run() {
 		case client := <-h.Register:
 			h.Clients[client.UserID] = client
 			fmt.Printf("logged %v\n", client.UserID)
-			
+
 		case client := <-h.Unregister:
 			if _, ok := h.Clients[client.UserID]; ok {
 				delete(h.Clients, client.UserID)

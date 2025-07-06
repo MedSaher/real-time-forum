@@ -2,7 +2,7 @@ package post
 
 import (
 	"encoding/json"
-	"fmt"
+	"log"
 	"net/http"
 	"real-time/internal/hub"
 	"real-time/internal/view"
@@ -64,7 +64,18 @@ func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	json.NewEncoder(w).Encode(postDTO)
-	for key, value := range h.hub.Clients{
-		fmt.Printf("%v : %v\n", key, value)
-	}
+	go func() {
+		msg := hub.Message{
+			Type: "new_post",
+			Data: postDTO,
+		}
+		data, err := json.Marshal(msg)
+		if err != nil {
+			log.Println("Failed to marshal WS message:", err)
+			return
+		}
+
+		h.hub.Broadcast <- data
+	}()
+
 }

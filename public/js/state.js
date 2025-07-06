@@ -1,3 +1,4 @@
+import { createPostFunc } from "/public/js/post.js";
 document.addEventListener("DOMContentLoaded", async () => {
   async function checkIfLoggedIn() {
     const res = await fetch('/api/session', {
@@ -103,9 +104,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     };
 
     socket.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        console.log("Received WS message:", data);
-    };
+    const message = JSON.parse(event.data);
+
+    if (message.type === "new_post") {
+        const post = message.data;
+        console.log("New post received:", post);
+    }
+};
+
 
     socket.onerror = (err) => {
         console.error("WebSocket error:", err);
@@ -118,28 +124,3 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 });
 
-async function createPostFunc() {
-  try {
-
-    const title = document.getElementById("post-title").value.trim()
-    const content = document.getElementById("post-content").value.trim()
-    const category = document.getElementById("post-category").value.trim()
-    const response = await fetch("/api/add_post", {
-      method: "POST",
-      headers: {
-        "Content-type": "application/json"
-      },
-      body: JSON.stringify({
-        title: title,
-        content: content,
-        categories: category,
-      })
-    })
-    if (response.ok) {
-    } else {
-      alert("not good")
-    }
-  } catch (error) {
-    alert("big not good")
-  }
-}
