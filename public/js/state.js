@@ -7,7 +7,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (res.ok) {
       const user = await res.json();
-      console.log(user);
       return user;
     } else {
       return null;
@@ -15,9 +14,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const user = await checkIfLoggedIn();
-  console.log(user);
 
   if (!user) return;
+
+  connectWebSocket();
 
   const mainContent = document.querySelector(".main-content"); // or add id="main-content" and use getElementById
   if (!mainContent) {
@@ -94,6 +94,28 @@ document.addEventListener("DOMContentLoaded", async () => {
     e.preventDefault();
     createPostFunc();
   });
+  function connectWebSocket() {
+    const socket = new WebSocket("ws://localhost:8080/ws");
+
+    socket.onopen = () => {
+        console.log("WebSocket connected");
+        // You can now send or receive messages
+    };
+
+    socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        console.log("Received WS message:", data);
+    };
+
+    socket.onerror = (err) => {
+        console.error("WebSocket error:", err);
+    };
+
+    socket.onclose = () => {
+        console.log("WebSocket closed");
+    };
+}
+
 });
 
 async function createPostFunc() {
@@ -114,7 +136,6 @@ async function createPostFunc() {
       })
     })
     if (response.ok) {
-      alert("good")
     } else {
       alert("not good")
     }

@@ -4,17 +4,19 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"real-time/internal/hub"
 	"real-time/internal/view"
 )
 
 type Handler struct {
 	Service *Service
+	hub     *hub.Hub
 }
 
 var erro view.Error
 
-func NewHandler(service *Service) *Handler {
-	return &Handler{Service: service}
+func NewHandler(service *Service, hub *hub.Hub) *Handler {
+	return &Handler{Service: service, hub: hub}
 }
 func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
@@ -50,7 +52,6 @@ func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 	var post Post
 	post.AuthorID = userId
 	json.NewDecoder(r.Body).Decode(&post)
-	fmt.Println(post.Title)
 	postDTO, err := h.Service.AddPost(&post)
 	if err != nil {
 		error := erro.ErrBroadCast(http.StatusInternalServerError, "Internal Server Error")
@@ -63,4 +64,7 @@ func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	json.NewEncoder(w).Encode(postDTO)
+	for key, value := range h.hub.Clients{
+		fmt.Printf("%v : %v\n", key, value)
+	}
 }
