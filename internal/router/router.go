@@ -6,6 +6,7 @@ import (
 	"real-time/internal/auth"
 	"real-time/internal/hub"
 	"real-time/internal/post"
+	"real-time/internal/users"
 )
 
 // SetupRoutes initializes and returns the HTTP router with all API routes registered.
@@ -51,6 +52,13 @@ func SetupRoutes(db *sql.DB) *http.ServeMux {
 	mux.HandleFunc("/api/add_post", postHandler.CreatePost)
 	mux.HandleFunc("/api/fetch_posts", postHandler.FetchPosts)
 
+	// initialize users layers 
+	usersRepo := users.NewRepository(db)
+	usersService := users.NewService(usersRepo)
+	usersHandler := users.NewHandler(usersService, hubS)
+
+	// users routes 
+	mux.HandleFunc("/api/users", usersHandler.UsersHandler)
 	// Other module routes would be registered similarly
 	// mux.HandleFunc("/api/posts", postsHandler.PostsHandler)
 	// mux.HandleFunc("/api/chat/ws", chatHandler.WebSocketHandler)

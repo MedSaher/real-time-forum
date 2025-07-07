@@ -15,6 +15,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       return null;
     }
   }
+  
+  FetchPosts()
 
   const user = await checkIfLoggedIn();
 
@@ -23,7 +25,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   connectWebSocketWithSharedWorker();
 
-  FetchPosts()
 
   CreatePostDOM();
   

@@ -107,7 +107,6 @@ func (r *sqlitePostRepo) GetAllPosts(page, limit int) ([]*PostDTO, error) {
 	defer rows.Close()
 
 	var posts []*PostDTO
-	count := 0
 	for rows.Next() {
 		post := &PostDTO{}
 		if err := rows.Scan(
@@ -125,9 +124,7 @@ func (r *sqlitePostRepo) GetAllPosts(page, limit int) ([]*PostDTO, error) {
 		); err != nil {fmt.Println(post.Timestamp)
 			return nil, fmt.Errorf("row scan error: %w", err)
 		}
-		fmt.Printf("Post #%d: %+v\n", count+1, post)
 		posts = append(posts, post)
-		count++
 	}
 	return posts, nil
 }

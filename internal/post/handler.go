@@ -40,8 +40,8 @@ func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 	}
 	userId, err := h.Service.repo.GetUserIdBySession(session_token.Value)
 	if err != nil {
-		error := erro.ErrBroadCast(http.StatusInternalServerError, "Internal Server Error")
-		w.WriteHeader(http.StatusInternalServerError)
+		error := erro.ErrBroadCast(http.StatusUnauthorized, "Unauthorized Acess")
+		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"status_code": error.StatusCode,
 			"error":       error.ErrMessage,
