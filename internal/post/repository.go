@@ -86,6 +86,7 @@ func (r *sqlitePostRepo) GetAllPosts(page, limit int) ([]*PostDTO, error) {
 		Post.LikeCount, 
 		Post.DislikeCount, 
 		IFNULL(GROUP_CONCAT(DISTINCT Category.Name), '') AS Categories, 
+		users.nickname,
 		users.first_name, 
 		users.last_name 
 	FROM Post
@@ -94,7 +95,7 @@ func (r *sqlitePostRepo) GetAllPosts(page, limit int) ([]*PostDTO, error) {
 	LEFT JOIN Category ON PostCategory.CategoryID = Category.ID
 	GROUP BY 
 		Post.ID, Post.Title, Post.Content, Post.AuthorID, Post.Timestamp, 
-		Post.LikeCount, Post.DislikeCount, 
+		Post.LikeCount, Post.DislikeCount, users.nickname, 
 		users.first_name, users.last_name
 	ORDER BY Post.ID DESC 
 	LIMIT ? OFFSET ?;`
@@ -118,9 +119,10 @@ func (r *sqlitePostRepo) GetAllPosts(page, limit int) ([]*PostDTO, error) {
 			&post.LikeCount,
 			&post.DislikeCount,
 			&post.CategoryName,
+			&post.NickName,
 			&post.AuthorFirstName,
 			&post.AuthorLastName,
-		); err != nil {
+		); err != nil {fmt.Println(post.Timestamp)
 			return nil, fmt.Errorf("row scan error: %w", err)
 		}
 		fmt.Printf("Post #%d: %+v\n", count+1, post)
