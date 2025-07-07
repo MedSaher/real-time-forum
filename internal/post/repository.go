@@ -127,10 +127,6 @@ func (r *sqlitePostRepo) GetAllPosts(page, limit int) ([]*PostDTO, error) {
 		posts = append(posts, post)
 		count++
 	}
-
-	if count == 0 {
-		fmt.Println("No posts found for this page.")
-	}
 	return posts, nil
 }
 

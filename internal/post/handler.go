@@ -2,7 +2,6 @@ package post
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"real-time/internal/hub"
@@ -94,7 +93,5 @@ func (h *Handler) FetchPosts(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	for _, post := range posts {
-		fmt.Println(post.Title)
-	}
+	json.NewEncoder(w).Encode(&posts)
 }
