@@ -27,9 +27,7 @@ var upgrader = websocket.Upgrader{
 }
 
 func (h *Handler) WebSocketHandler(w http.ResponseWriter, r *http.Request) {
-	// Check if user is logged in by reading the session cookie
 	session, err := r.Cookie("session_token")
-
 	if err != nil {
 		error := erro.ErrBroadCast(http.StatusUnauthorized, "Unauthorized")
 		w.WriteHeader(http.StatusUnauthorized)
@@ -41,7 +39,6 @@ func (h *Handler) WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userId, err := h.service.wsRepo.GetUserIdBySession(session.Value)
-
 	if err != nil {
 		error := erro.ErrBroadCast(http.StatusUnauthorized, "Unauthorized")
 		w.WriteHeader(http.StatusUnauthorized)
@@ -64,12 +61,34 @@ func (h *Handler) WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 		UserID: userId,
 		Conn:   conn,
 		Send:   make(chan []byte),
-		Hub:    h.hub, // you need to pass the instance here
+		Hub:    h.hub,
 	}
 
+	// Register the client
 	h.hub.Register <- client
+	
+	go func(newClientID string) {
+		msg := Message{Type: "online_users"}
+		data, err := json.Marshal(msg)
+		if err != nil {
+			log.Println("Failed to marshal message:", err)
+			return
+		}
+
+		// Send to all clients *except* the newly connected one
+		for uid, cl := range h.hub.Clients {
+			if uid == newClientID {
+				continue
+			}
+			select {
+			case cl.Send <- data:
+			default:
+				close(cl.Send)
+				delete(h.hub.Clients, uid)
+			}
+		}
+	}(client.UserID)
 
 	go client.ReadPump()
 	go client.WritePump()
-
 }

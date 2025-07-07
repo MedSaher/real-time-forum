@@ -34,7 +34,7 @@ func SetupRoutes(db *sql.DB) *http.ServeMux {
 	// Initialize the auth layer components
 	userRepo := auth.NewUserRepository(db)
 	authService := auth.NewService(userRepo)
-	authHandler := auth.NewHandler(authService)
+	authHandler := auth.NewHandler(authService, hubS)
 
 	// Auth routes
 	mux.HandleFunc("/api/register", authHandler.RegisterHandler)

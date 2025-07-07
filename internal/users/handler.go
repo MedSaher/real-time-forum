@@ -2,7 +2,6 @@ package users
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"real-time/internal/hub"
 	"real-time/internal/view"
@@ -51,9 +50,8 @@ func (h *Handler) UsersHandler(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	_, err = h.Service.GetAllUsers(h.Hub)
+	users, err := h.Service.GetAllUsers(h.Hub)
 	if err != nil {
-		fmt.Println(err)
 		error := erro.ErrBroadCast(http.StatusInternalServerError, "Internal Server Error")
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]interface{}{
@@ -63,4 +61,6 @@ func (h *Handler) UsersHandler(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
+	json.NewEncoder(w).Encode(users)
+
 }

@@ -30,6 +30,7 @@ func (r *sqliteUsersRepo) GetAllUsers() ([]*User, error) {
 		if err := rows.Scan(&user.UserId, &user.Nickname); err != nil {
 			return nil, err
 		}
+		user.Status = false
 		Users = append(Users, user)
 	}
 	return Users, nil

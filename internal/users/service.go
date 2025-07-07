@@ -1,15 +1,15 @@
 package users
 
 import (
-	"fmt"
 	"real-time/internal/hub"
+	"sort"
 )
 
 type Service struct {
 	repo UsersRepository
 }
 
-func NewService(repo UsersRepository) *Service{
+func NewService(repo UsersRepository) *Service {
 	return &Service{repo: repo}
 }
 
@@ -18,12 +18,18 @@ func (s *Service) GetAllUsers(hub *hub.Hub) ([]*User, error) {
 	if err != nil {
 		return nil, err
 	}
-	for _, user := range users {
-		fmt.Println(user.Nickname)
+	// mark users as online
+	for _, client := range hub.Clients {
+		for _, user := range users {
+			if client.UserID == user.UserId {
+				user.Status = true
+
+			}
+		}
 	}
-	fmt.Println("===========")
-	for _, user := range hub.Clients {
-		fmt.Println(user.UserID)
-	}
-	return nil, nil
+	// sort by online
+	sort.Slice(users, func(i, j int) bool {
+		return users[i].Status && !users[j].Status
+	})
+	return users, nil
 }

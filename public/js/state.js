@@ -40,6 +40,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (message.type === "new_post") {
         const post = message.data;
         FetchPosts();
+      } else if (message.type === "online_users") {
+        console.log(message.type)
       }
     };
   }

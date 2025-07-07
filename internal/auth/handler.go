@@ -4,16 +4,18 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"real-time/internal/hub"
 	"real-time/internal/view"
 	"time"
 )
 
 type Handler struct {
 	service *Service
+	Hub     *hub.Hub
 }
 
-func NewHandler(service *Service) *Handler {
-	return &Handler{service: service}
+func NewHandler(service *Service, hub *hub.Hub) *Handler {
+	return &Handler{service: service, Hub: hub}
 }
 
 var erro view.Error
@@ -102,6 +104,7 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteStrictMode,
 		Expires:  time.Now().Add(24 * time.Hour), // Adjust session duration
 	})
+
 }
 
 func (h *Handler) LoggedInHandler(w http.ResponseWriter, r *http.Request) {

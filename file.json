@@ -1,132 +1,62 @@
 [
     {
-        "id": 23,
-        "nickname": "saher_m",
-        "title": "Test",
-        "content": "test",
-        "authorId": 3,
-        "time": "2025-07-07T17:25:19Z",
-        "likeCount": 0,
-        "dislikeCount": 0,
-        "categoryName": "",
-        "authorFirstName": "Saher",
-        "authorLastName": "Mohamed"
+        "UserId": "3",
+        "Nickname": "saher_m",
+        "Status": true
     },
     {
-        "id": 22,
-        "nickname": "saher_m",
-        "title": "saher tester",
-        "content": "test",
-        "authorId": 3,
-        "time": "2025-07-06T22:09:14Z",
-        "likeCount": 0,
-        "dislikeCount": 0,
-        "categoryName": "",
-        "authorFirstName": "Saher",
-        "authorLastName": "Mohamed"
+        "UserId": "9",
+        "Nickname": "AltheaHart",
+        "Status": false
     },
     {
-        "id": 21,
-        "nickname": "saher_m",
-        "title": "hfhf",
-        "content": "nfnf",
-        "authorId": 3,
-        "time": "2025-07-06T22:03:48Z",
-        "likeCount": 0,
-        "dislikeCount": 0,
-        "categoryName": "",
-        "authorFirstName": "Saher",
-        "authorLastName": "Mohamed"
+        "UserId": "6",
+        "Nickname": "ArsenioDiaz",
+        "Status": false
     },
     {
-        "id": 20,
-        "nickname": "saher_2",
-        "title": "Amet deserunt dolor",
-        "content": "Sit amet molestiae",
-        "authorId": 11,
-        "time": "2025-07-06T22:02:02Z",
-        "likeCount": 0,
-        "dislikeCount": 0,
-        "categoryName": "",
-        "authorFirstName": "m",
-        "authorLastName": "m"
+        "UserId": "10",
+        "Nickname": "AuroraDonovan",
+        "Status": false
     },
     {
-        "id": 19,
-        "nickname": "saher_2",
-        "title": "Cum itaque et quis d",
-        "content": "Sapiente officiis at",
-        "authorId": 11,
-        "time": "2025-07-06T22:01:46Z",
-        "likeCount": 0,
-        "dislikeCount": 0,
-        "categoryName": "",
-        "authorFirstName": "m",
-        "authorLastName": "m"
+        "UserId": "7",
+        "Nickname": "DeclanWooten",
+        "Status": false
     },
     {
-        "id": 18,
-        "nickname": "saher_2",
-        "title": "Sint vel totam qui f",
-        "content": "Facere rerum accusan",
-        "authorId": 11,
-        "time": "2025-07-06T22:01:08Z",
-        "likeCount": 0,
-        "dislikeCount": 0,
-        "categoryName": "",
-        "authorFirstName": "m",
-        "authorLastName": "m"
+        "UserId": "8",
+        "Nickname": "SavannahCunningham",
+        "Status": false
     },
     {
-        "id": 17,
-        "nickname": "saher_2",
-        "title": "Lorem est magna dui",
-        "content": "Facere hic temporibu",
-        "authorId": 11,
-        "time": "2025-07-06T21:59:42Z",
-        "likeCount": 0,
-        "dislikeCount": 0,
-        "categoryName": "",
-        "authorFirstName": "m",
-        "authorLastName": "m"
+        "UserId": "5",
+        "Nickname": "d",
+        "Status": false
     },
     {
-        "id": 16,
-        "nickname": "saher_2",
-        "title": "Placeat perferendis",
-        "content": "Fugiat magna et ipsa",
-        "authorId": 11,
-        "time": "2025-07-06T21:58:51Z",
-        "likeCount": 0,
-        "dislikeCount": 0,
-        "categoryName": "",
-        "authorFirstName": "m",
-        "authorLastName": "m"
+        "UserId": "2",
+        "Nickname": "my full nam",
+        "Status": false
     },
     {
-        "id": 15,
-        "nickname": "saher_2",
-        "title": "Placeat perferendis",
-        "content": "Fugiat magna et ipsa",
-        "authorId": 11,
-        "time": "2025-07-06T21:58:49Z",
-        "likeCount": 0,
-        "dislikeCount": 0,
-        "categoryName": "",
-        "authorFirstName": "m",
-        "authorLastName": "m"
+        "UserId": "1",
+        "Nickname": "my full name",
+        "Status": false
     },
     {
-        "id": 14,
-        "nickname": "saher_2",
-        "title": "Eum dolores odio com",
-        "content": "Alias accusamus eaqu",
-        "authorId": 11,
-        "time": "2025-07-06T21:49:52Z",
-        "likeCount": 0,
-        "dislikeCount": 0,
-        "categoryName": "",
-        "authorFirstName": "m",
-        "authorLastName": "m"
+        "UserId": "11",
+        "Nickname": "saher_2",
+        "Status": false
+    },
+    {
+        "UserId": "12",
+        "Nickname": "saher_3",
+        "Status": false
+    },
+    {
+        "UserId": "4",
+        "Nickname": "tester",
+        "Status": false
     }
 ]
