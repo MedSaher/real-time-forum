@@ -37,8 +37,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       const message = e.data;
 
       if (message.type === "new_post") {
-        const post = message.post;
-        console.log("📨 New post from WS:", post);
+        const post = message.data;
+        FetchPosts();
       }
     };
   }

@@ -28,7 +28,6 @@ func (h *Hub) Run() {
 		select {
 		case client := <-h.Register:
 			h.Clients[client.UserID] = client
-			fmt.Printf("logged %v\n", client.UserID)
 
 		case client := <-h.Unregister:
 			if _, ok := h.Clients[client.UserID]; ok {
@@ -38,6 +37,7 @@ func (h *Hub) Run() {
 			}
 
 		case message := <-h.Broadcast:
+			fmt.Println("message : ",string(message))
 			for _, client := range h.Clients {
 				select {
 				case client.Send <- message:

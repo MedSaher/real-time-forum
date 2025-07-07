@@ -37,7 +37,9 @@ export async function FetchPosts() {
       return;
     }
 
-    mainContent.innerHTML = "";
+    const existingPosts = mainContent.querySelectorAll(".post");
+    existingPosts.forEach(post => post.remove());
+
 
     const response = await fetch("/api/fetch_posts", {
       method: "GET",
