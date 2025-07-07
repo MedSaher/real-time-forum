@@ -2,6 +2,7 @@ package post
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"real-time/internal/hub"
@@ -78,4 +79,22 @@ func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 		h.hub.Broadcast <- data
 	}()
 
+}
+
+func (h *Handler) FetchPosts(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		erro.ErrBroadCast(http.StatusMethodNotAllowed, "Method not allowed")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"status_code": erro.StatusCode,
+			"error":       erro.ErrMessage,
+		})
+	}
+	posts, err := h.Service.repo.GetAllPosts(1, 10)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, post := range posts {
+		fmt.Println(post.Title)
+	}
 }

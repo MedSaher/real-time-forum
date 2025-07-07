@@ -6,7 +6,7 @@ type UsersRepository interface {
 	GetAllUsers() ([]*User, error)
 }
 
-func newRepository(db *sql.DB) UsersRepository {
+func NewRepository(db *sql.DB) UsersRepository {
 	return &sqliteUsersRepo{db: db}
 }
 

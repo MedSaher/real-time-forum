@@ -3,11 +3,13 @@ package post
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 )
 
 type PostRepository interface {
 	CreatePost(post *Post) (*PostDTO, error)
 	GetUserIdBySession(token string) (string, error)
+	GetAllPosts(page, limit int) ([]*PostDTO, error)
 }
 
 type sqlitePostRepo struct {
@@ -64,3 +66,71 @@ func (r *sqlitePostRepo) GetUserIdBySession(token string) (string, error) {
 
 	return userId, nil
 }
+
+func (r *sqlitePostRepo) GetAllPosts(page, limit int) ([]*PostDTO, error) {
+	if page <= 0 {
+		page = 1
+	}
+	if limit <= 0 {
+		limit = 10
+	}
+	offset := (page - 1) * limit
+
+	query := `
+	SELECT 
+		Post.ID, 
+		Post.Title, 
+		Post.Content, 
+		Post.AuthorID, 
+		Post.Timestamp, 
+		Post.LikeCount, 
+		Post.DislikeCount, 
+		IFNULL(GROUP_CONCAT(DISTINCT Category.Name), '') AS Categories, 
+		users.first_name, 
+		users.last_name 
+	FROM Post
+	INNER JOIN users ON users.id = Post.AuthorID
+	LEFT JOIN PostCategory ON Post.ID = PostCategory.PostID
+	LEFT JOIN Category ON PostCategory.CategoryID = Category.ID
+	GROUP BY 
+		Post.ID, Post.Title, Post.Content, Post.AuthorID, Post.Timestamp, 
+		Post.LikeCount, Post.DislikeCount, 
+		users.first_name, users.last_name
+	ORDER BY Post.ID DESC 
+	LIMIT ? OFFSET ?;`
+
+	rows, err := r.db.Query(query, limit, offset)
+	if err != nil {
+		return nil, fmt.Errorf("query error: %w", err)
+	}
+	defer rows.Close()
+
+	var posts []*PostDTO
+	count := 0
+	for rows.Next() {
+		post := &PostDTO{}
+		if err := rows.Scan(
+			&post.ID,
+			&post.Title,
+			&post.Content,
+			&post.AuthorID,
+			&post.Timestamp,
+			&post.LikeCount,
+			&post.DislikeCount,
+			&post.CategoryName,
+			&post.AuthorFirstName,
+			&post.AuthorLastName,
+		); err != nil {
+			return nil, fmt.Errorf("row scan error: %w", err)
+		}
+		fmt.Printf("Post #%d: %+v\n", count+1, post)
+		posts = append(posts, post)
+		count++
+	}
+
+	if count == 0 {
+		fmt.Println("No posts found for this page.")
+	}
+	return posts, nil
+}
+

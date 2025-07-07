@@ -49,6 +49,7 @@ func SetupRoutes(db *sql.DB) *http.ServeMux {
 
 	// Post routes
 	mux.HandleFunc("/api/add_post", postHandler.CreatePost)
+	mux.HandleFunc("/api/fetch_posts", postHandler.FetchPosts)
 
 	// Other module routes would be registered similarly
 	// mux.HandleFunc("/api/posts", postsHandler.PostsHandler)
