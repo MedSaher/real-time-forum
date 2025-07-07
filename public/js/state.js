@@ -1,4 +1,6 @@
 import { createPostFunc } from "/public/js/post.js";
+let worker;
+let port;
 document.addEventListener("DOMContentLoaded", async () => {
   async function checkIfLoggedIn() {
     const res = await fetch('/api/session', {
@@ -18,7 +20,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (!user) return;
 
-  connectWebSocket();
+
+  connectWebSocketWithSharedWorker();
 
   const mainContent = document.querySelector(".main-content"); // or add id="main-content" and use getElementById
   if (!mainContent) {
@@ -95,32 +98,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     e.preventDefault();
     createPostFunc();
   });
-  function connectWebSocket() {
-    const socket = new WebSocket("ws://localhost:8080/ws");
 
-    socket.onopen = () => {
-        console.log("WebSocket connected");
-        // You can now send or receive messages
+  function connectWebSocketWithSharedWorker() {
+    worker = new SharedWorker("/public/js/ws-worker.js");
+    port = worker.port;
+    port.start();
+
+    port.onmessage = (e) => {
+      const message = e.data;
+
+      if (message.type === "new_post") {
+        const post = message.post;
+        console.log("📨 New post from WS:", post);
+      }
     };
+  }
 
-    socket.onmessage = (event) => {
-    const message = JSON.parse(event.data);
-
-    if (message.type === "new_post") {
-        const post = message.data;
-        console.log("New post received:", post);
-    }
-};
-
-
-    socket.onerror = (err) => {
-        console.error("WebSocket error:", err);
-    };
-
-    socket.onclose = () => {
-        console.log("WebSocket closed");
-    };
-}
 
 });
 
