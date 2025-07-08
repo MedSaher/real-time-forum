@@ -1,4 +1,5 @@
 import { CreatePostDOM, FetchPosts } from "/public/js/post.js";
+import { FetchUsers } from "/public/js/users.js";
 let worker;
 let port;
 document.addEventListener("DOMContentLoaded", async () => {
@@ -41,7 +42,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const post = message.data;
         FetchPosts();
       } else if (message.type === "online_users") {
-        console.log(message.type)
+        FetchUsers();
       }
     };
   }

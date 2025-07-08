@@ -12,29 +12,29 @@ type Handler struct {
 	Hub     *hub.Hub
 }
 
-var erro view.Error
-
 func NewHandler(service *Service, hub *hub.Hub) *Handler {
 	return &Handler{Service: service, Hub: hub}
 }
 
 func (h *Handler) UsersHandler(w http.ResponseWriter, r *http.Request) {
+	var erro view.Error
 	if r.Method != http.MethodPost {
-		erro.ErrBroadCast(http.StatusMethodNotAllowed, "Method not allowed")
+		error := erro.ErrBroadCast(http.StatusMethodNotAllowed, "Method not allowed")
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]interface{}{
-			"status_code": erro.StatusCode,
-			"error":       erro.ErrMessage,
+			"status_code": error.StatusCode,
+			"error":       error.ErrMessage,
 		})
+		return
 	}
 
 	session_token, err := r.Cookie("session_token")
 	if err != nil {
-		erro.ErrBroadCast(http.StatusUnauthorized, "Unauthorized Acess")
+		error := erro.ErrBroadCast(http.StatusUnauthorized, "Unauthorized Acess")
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(map[string]interface{}{
-			"status_code": erro.StatusCode,
-			"error":       erro.ErrMessage,
+			"status_code": error.StatusCode,
+			"error":       error.ErrMessage,
 		})
 		return
 	}

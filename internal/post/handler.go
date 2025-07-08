@@ -20,21 +20,21 @@ func NewHandler(service *Service, hub *hub.Hub) *Handler {
 }
 func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		erro.ErrBroadCast(http.StatusMethodNotAllowed, "Method not allowed")
+		error := erro.ErrBroadCast(http.StatusMethodNotAllowed, "Method not allowed")
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]interface{}{
-			"status_code": erro.StatusCode,
-			"error":       erro.ErrMessage,
+			"status_code": error.StatusCode,
+			"error":       error.ErrMessage,
 		})
 	}
 
 	session_token, err := r.Cookie("session_token")
 	if err != nil {
-		erro.ErrBroadCast(http.StatusUnauthorized, "Unauthorized Acess")
+		error := erro.ErrBroadCast(http.StatusUnauthorized, "Unauthorized Acess")
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(map[string]interface{}{
-			"status_code": erro.StatusCode,
-			"error":       erro.ErrMessage,
+			"status_code": error.StatusCode,
+			"error":       error.ErrMessage,
 		})
 		return
 	}

@@ -63,40 +63,71 @@
 
  /* Sidebar */
  .sidebar {
-   width: 220px;
-   background-color: #ffffff;
-   padding: 20px;
-   border-right: 1px solid #ccc;
-   overflow-y: auto;
- }
+  width: 240px;
+  background-color: #ffffff;
+  padding: 20px;
+  border-right: 1px solid #e0e0e0;
+  overflow-y: auto;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
 
- .sidebar h3 {
-   color: var(--primary);
-   margin-bottom: 16px;
-   font-size: 18px;
- }
+.sidebar h3 {
+  color: var(--primary);
+  margin-bottom: 16px;
+  font-size: 18px;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 6px;
+}
 
- .user-list {
-   list-style: none;
-   padding: 0;
-   margin: 0;
- }
+.user-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
 
- .user-list li {
-   padding: 10px;
-   margin-bottom: 6px;
-   background-color: #fafafa;
-   border-radius: 6px;
-   display: flex;
-   align-items: center;
-   gap: 10px;
-   cursor: pointer;
-   transition: background 0.3s;
- }
+.user-list li {
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+  transition: background-color 0.25s ease;
+}
 
- .user-list li:hover {
-   background-color: var(--secondary);
- }
+.user-list li:hover {
+  background-color: var(--secondary);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-grow: 1;
+}
+
+.user-info i {
+  font-size: 20px;
+  color: #666;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-online {
+  background-color: limegreen;
+}
+
+.status-offline {
+  background-color: gray;
+}
 
  /* Main content */
  .main-content {

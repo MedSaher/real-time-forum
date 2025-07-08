@@ -66,7 +66,7 @@ func (h *Handler) WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Register the client
 	h.hub.Register <- client
-	
+
 	go func(newClientID string) {
 		msg := Message{Type: "online_users"}
 		data, err := json.Marshal(msg)
@@ -77,9 +77,6 @@ func (h *Handler) WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 
 		// Send to all clients *except* the newly connected one
 		for uid, cl := range h.hub.Clients {
-			if uid == newClientID {
-				continue
-			}
 			select {
 			case cl.Send <- data:
 			default:
@@ -88,7 +85,6 @@ func (h *Handler) WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}(client.UserID)
-
 	go client.ReadPump()
 	go client.WritePump()
 }
