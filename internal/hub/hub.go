@@ -1,12 +1,16 @@
 package hub
 
-import "fmt"
+import (
+	"fmt"
+	"sync"
+)
 
 type Hub struct {
 	Clients    map[string]*Client
 	Register   chan *Client
 	Unregister chan *Client
 	Broadcast  chan []byte
+	Mutex      *sync.Mutex
 }
 
 type Message struct {
@@ -20,6 +24,7 @@ func NewHub() *Hub {
 		Register:   make(chan *Client),
 		Unregister: make(chan *Client),
 		Broadcast:  make(chan []byte),
+		Mutex: &sync.Mutex{},
 	}
 }
 
@@ -27,7 +32,9 @@ func (h *Hub) Run() {
 	for {
 		select {
 		case client := <-h.Register:
+			h.Mutex.Lock();
 			h.Clients[client.UserID] = client
+			h.Mutex.Unlock();
 
 		case client := <-h.Unregister:
 			if _, ok := h.Clients[client.UserID]; ok {

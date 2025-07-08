@@ -2,6 +2,7 @@ package hub
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"real-time/internal/view"
@@ -27,6 +28,7 @@ var upgrader = websocket.Upgrader{
 }
 
 func (h *Handler) WebSocketHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Upgraded succ")
 	session, err := r.Cookie("session_token")
 	if err != nil {
 		error := erro.ErrBroadCast(http.StatusUnauthorized, "Unauthorized")
@@ -48,6 +50,7 @@ func (h *Handler) WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
+
 
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -77,6 +80,9 @@ func (h *Handler) WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 
 		// Send to all clients *except* the newly connected one
 		for uid, cl := range h.hub.Clients {
+			// if newClientID == uid {
+			// 	continue
+			// }
 			select {
 			case cl.Send <- data:
 			default:

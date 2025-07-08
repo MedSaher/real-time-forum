@@ -40,20 +40,25 @@
    font-weight: 600;
  }
 
- .navbar button {
-   background-color: white;
-   color: var(--primary);
-   border: none;
-   padding: 8px 14px;
-   border-radius: 6px;
-   font-weight: 600;
-   cursor: pointer;
-   transition: background 0.3s ease;
- }
+.navbar-button {
+  background-color: white;
+  color: var(--primary);
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none; /* removes underline */
+  display: inline-flex;
+  align-items: center;
+  gap: 6px; /* spacing between icon and text */
+  transition: background 0.3s ease;
+}
 
- .navbar button:hover {
-   background-color: var(--secondary);
- }
+.navbar-button:hover {
+  background-color: var(--secondary);
+}
+
 
  /* Layout */
  .layout {
@@ -102,14 +107,14 @@
   background-color: var(--secondary);
 }
 
-.user-info {
+.users-info {
   display: flex;
   align-items: center;
   gap: 10px;
   flex-grow: 1;
 }
 
-.user-info i {
+.users-info i {
   font-size: 20px;
   color: #666;
 }

@@ -89,6 +89,7 @@ func (s *Service) Login(input *LoginInput) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	s.repo.FindSessionByID(user.ID)
 
 	token, err = s.repo.CreateSession(token, user.ID)
 

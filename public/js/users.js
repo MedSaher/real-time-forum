@@ -27,7 +27,7 @@ function renderUserList(users) {
 
     // Create the icon + name container
     const userInfo = document.createElement("div");
-    userInfo.className = "user-info";
+    userInfo.className = "users-info";
 
     const icon = document.createElement("i");
     icon.className = "fa-solid fa-circle-user";
@@ -50,3 +50,12 @@ function renderUserList(users) {
   });
 }
 
+export async function BuildProfile(user) {
+  
+    const nickname = document.getElementById("nickname");
+    const actionBtn = document.getElementById("authenticate");
+    nickname.innerHTML = `<i class="fa-solid fa-user"></i> ${user.nickname}`
+
+    actionBtn.innerHTML = `<i class="fa-solid fa-right-from-bracket"></i> Logout`
+    actionBtn.href = "/somewhere else"
+}

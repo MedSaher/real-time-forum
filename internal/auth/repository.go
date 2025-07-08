@@ -15,6 +15,7 @@ type UserRepository interface {
 	GetUserIdBySession(token string) (string, error)
 	GetUserNameById(userId string) (string, error)
 	CreateUser(user *User) error
+	FindSessionByID(userId string)
 }
 
 type sqliteUserRepo struct {
@@ -116,4 +117,27 @@ func (r *sqliteUserRepo) GetUserNameById(userId string) (string, error) {
 	}
 
 	return userName, nil
+}
+
+func (r *sqliteUserRepo) FindSessionByID(userId string) {
+	query := `SELECT UUID FROM Session WHERE UserID = ? LIMIT 1`
+
+	var sessionUUID string
+	err := r.db.QueryRow(query, userId).Scan(&sessionUUID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			// No session found for this user
+			return
+		}
+		// Log or handle unexpected DB error
+		return
+	}
+
+	// If session is found, delete it
+	deleteQuery := `DELETE FROM Session WHERE UUID = ?`
+	_, err = r.db.Exec(deleteQuery, sessionUUID)
+	if err != nil {
+		// Log or handle delete error
+		return
+	}
 }

@@ -22,7 +22,7 @@ export async function createPostFunc() {
     if (response.ok) {
       form.reset();
     } else {
-      alert("Post submission failed");
+      window.location.href = "/"
     }
   } catch (error) {
     alert("Unexpected error occurred");

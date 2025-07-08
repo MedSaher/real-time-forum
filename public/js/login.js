@@ -13,7 +13,7 @@ loginForm.addEventListener("submit", async (e) => {
 
 async function login(identifier, password) {
     try {
-        const response = await fetch("http://localhost:8080/api/login", {
+        const response = await fetch("/api/login", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
