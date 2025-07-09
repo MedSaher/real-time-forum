@@ -2,8 +2,10 @@ package post
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+
 	"real-time/internal/hub"
 	"real-time/internal/view"
 )
@@ -18,6 +20,7 @@ var erro view.Error
 func NewHandler(service *Service, hub *hub.Hub) *Handler {
 	return &Handler{Service: service, hub: hub}
 }
+
 func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		error := erro.ErrBroadCast(http.StatusMethodNotAllowed, "Method not allowed")
@@ -77,7 +80,6 @@ func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 
 		h.hub.Broadcast <- data
 	}()
-
 }
 
 func (h *Handler) FetchPosts(w http.ResponseWriter, r *http.Request) {
@@ -88,10 +90,49 @@ func (h *Handler) FetchPosts(w http.ResponseWriter, r *http.Request) {
 			"status_code": erro.StatusCode,
 			"error":       erro.ErrMessage,
 		})
+		return
 	}
-	posts, err := h.Service.repo.GetAllPosts(1, 10)
+
+	session_token, err := r.Cookie("session_token")
+	if err != nil {
+		http.Error(w, "Unauthorized Access", http.StatusUnauthorized)
+		return
+	}
+	_, err = h.Service.repo.GetUserIdBySession(session_token.Value)
+	if err != nil {
+		http.Error(w, "Unauthorized Access", http.StatusUnauthorized)
+		return
+	}
+
+	posts, err := h.Service.repo.GetAllPosts()
 	if err != nil {
 		log.Fatal(err)
 	}
 	json.NewEncoder(w).Encode(&posts)
+}
+
+func (h *Handler) CommentHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	session_token, err := r.Cookie("session_token")
+	if err != nil {
+		http.Error(w, "Unauthorized Access", http.StatusUnauthorized)
+		return
+	}
+	var comment Comment
+	json.NewDecoder(r.Body).Decode(&comment)
+	userId, err := h.Service.repo.GetUserIdBySession(session_token.Value)
+	if err != nil {
+		http.Error(w, "Unauthorized Access", http.StatusUnauthorized)
+		return
+	}
+	comment.AuthorId = userId
+	fmt.Println(comment.PostID)
+	err = h.Service.repo.CreateComment(comment.PostID, comment.AuthorId, comment.PostContent)
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
 }

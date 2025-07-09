@@ -25,3 +25,9 @@ type PostDTO struct {
 	AuthorFirstName string    `json:"authorFirstName"`
 	AuthorLastName  string    `json:"authorLastName"`
 }
+
+type Comment struct {
+	PostID      string `json:"post_id"`
+	PostContent string `json:"comment"`
+	AuthorId    string
+}

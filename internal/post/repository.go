@@ -4,12 +4,14 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
 )
 
 type PostRepository interface {
 	CreatePost(post *Post) (*PostDTO, error)
 	GetUserIdBySession(token string) (string, error)
-	GetAllPosts(page, limit int) ([]*PostDTO, error)
+	GetAllPosts() ([]*PostDTO, error)
+	CreateComment(postId string, authorId string, comment string) error
 }
 
 type sqlitePostRepo struct {
@@ -21,7 +23,6 @@ func NewPostRepository(db *sql.DB) PostRepository {
 }
 
 func (r *sqlitePostRepo) CreatePost(post *Post) (*PostDTO, error) {
-
 	// Insert the new post into the Post table
 	query := `INSERT INTO Post (Title, Content, AuthorID)
           VALUES (?, ?, ?)`
@@ -55,6 +56,7 @@ func (r *sqlitePostRepo) CreatePost(post *Post) (*PostDTO, error) {
 	// Return the full postDTO details including author and timestamp
 	return &postDTO, nil
 }
+
 func (r *sqlitePostRepo) GetUserIdBySession(token string) (string, error) {
 	query := `SELECT UserId FROM Session WHERE UUID = ?`
 
@@ -67,14 +69,7 @@ func (r *sqlitePostRepo) GetUserIdBySession(token string) (string, error) {
 	return userId, nil
 }
 
-func (r *sqlitePostRepo) GetAllPosts(page, limit int) ([]*PostDTO, error) {
-	if page <= 0 {
-		page = 1
-	}
-	if limit <= 0 {
-		limit = 10
-	}
-	offset := (page - 1) * limit
+func (r *sqlitePostRepo) GetAllPosts() ([]*PostDTO, error) {
 
 	query := `
 	SELECT 
@@ -97,10 +92,9 @@ func (r *sqlitePostRepo) GetAllPosts(page, limit int) ([]*PostDTO, error) {
 		Post.ID, Post.Title, Post.Content, Post.AuthorID, Post.Timestamp, 
 		Post.LikeCount, Post.DislikeCount, users.nickname, 
 		users.first_name, users.last_name
-	ORDER BY Post.ID DESC 
-	LIMIT ? OFFSET ?;`
+	ORDER BY Post.ID DESC;`
 
-	rows, err := r.db.Query(query, limit, offset)
+	rows, err := r.db.Query(query)
 	if err != nil {
 		return nil, fmt.Errorf("query error: %w", err)
 	}
@@ -121,7 +115,8 @@ func (r *sqlitePostRepo) GetAllPosts(page, limit int) ([]*PostDTO, error) {
 			&post.NickName,
 			&post.AuthorFirstName,
 			&post.AuthorLastName,
-		); err != nil {fmt.Println(post.Timestamp)
+		); err != nil {
+			fmt.Println(post.Timestamp)
 			return nil, fmt.Errorf("row scan error: %w", err)
 		}
 		posts = append(posts, post)
@@ -129,3 +124,11 @@ func (r *sqlitePostRepo) GetAllPosts(page, limit int) ([]*PostDTO, error) {
 	return posts, nil
 }
 
+func (r *sqlitePostRepo) CreateComment(postId string, authorId string, content string) error {
+	query := `INSERT INTO Comment (Content, AuthorID, PostID, Timestamp, LikeCount, DislikeCount) VALUES (?, ?, ?, ?, 0, 0)`
+	_, err := r.db.Exec(query, content, authorId, postId, time.Now().Format(time.RFC3339))
+	if err != nil {
+		return err
+	}
+	return nil
+}

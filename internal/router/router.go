@@ -51,6 +51,7 @@ func SetupRoutes(db *sql.DB) *http.ServeMux {
 	// Post routes
 	mux.HandleFunc("/api/add_post", postHandler.CreatePost)
 	mux.HandleFunc("/api/fetch_posts", postHandler.FetchPosts)
+	mux.HandleFunc("/api/add_comment", postHandler.CommentHandler)
 
 	// initialize users layers 
 	usersRepo := users.NewRepository(db)

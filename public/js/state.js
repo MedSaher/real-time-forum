@@ -2,6 +2,7 @@
 import { BuildLoginPage } from "/public/js/login.js";
 import { BuildMainPage, CreatePostDOM, FetchPosts } from "/public/js/post.js";
 import { FetchUsers, BuildProfile } from "/public/js/users.js";
+import { InitCommentModal } from "/public/js/comment.js";
 
 let worker = null;
 let port = null;
@@ -21,6 +22,7 @@ export async function renderHome() {
   BuildProfile(user);         // Show user in navbar
   CreatePostDOM();            // Add post form
   FetchUsers();               // Sidebar user list
+  InitCommentModal();         // init comment modal
   connectWebSocketSharedWorker();  // Real-time sync
 }
 

@@ -1,3 +1,5 @@
+import {ShowCommentModal} from "/public/js/comment.js";
+
 export async function createPostFunc() {
   try {
     const form = document.getElementById("post-form");
@@ -59,6 +61,8 @@ export async function FetchPosts() {
     }
 
     posts.forEach((post) => {
+      // console.log(post.id);
+      
       const postDiv = document.createElement("div");
       postDiv.className = "post";
 
@@ -114,6 +118,10 @@ export async function FetchPosts() {
       const commentIcon = document.createElement("i");
       commentIcon.className = "fa-solid fa-comment";
       commentSpan.appendChild(commentIcon);
+
+      commentIcon.addEventListener("click", () => {
+        ShowCommentModal(post);
+      });
 
 
       // Append all spans to reactions container
@@ -219,7 +227,7 @@ export async function CreatePostDOM() {
 export function BuildMainPage() {
   const body = document.body;
 
-   const links = document.querySelectorAll('link[rel="stylesheet"]');
+  const links = document.querySelectorAll('link[rel="stylesheet"]');
   for (const link of links) {
     if (link.href.includes("register.css")) {
       link.parentNode.removeChild(link);
@@ -370,3 +378,4 @@ export function BuildErrorPage(code = 404, message = "Page Not Found") {
   container.append(icon, codeEl, msg, button);
   document.body.appendChild(container);
 }
+
