@@ -16,11 +16,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       return null;
     }
   }
-  
+
   FetchPosts()
 
   const user = await checkIfLoggedIn();
-  
+
 
   if (!user) return;
 
@@ -32,62 +32,52 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   CreatePostDOM();
 
-  // FetchUsers(user);
-  
+  FetchUsers();
 
- function connectWebSocketWithSharedWorker() {
-  try {
-    if (worker && port) {
-      console.warn("WebSocket SharedWorker already initialized.");
-      return; // Prevent double initialization
+
+  function connectWebSocketWithSharedWorker() {
+    try {
+      if (worker && port) {
+        console.warn("WebSocket SharedWorker already initialized.");
+        return; // Prevent double initialization
+      }
+
+      // Initialize SharedWorker
+      worker = new SharedWorker("/public/js/ws-worker.js");
+      port = worker.port;
+
+      // Start the port communication
+      port.start();
+
+      console.log("[WS] SharedWorker initialized.");
+
+      // Handle incoming messages from the SharedWorker
+      port.onmessage = (e) => {
+        const message = e.data;
+
+        if (!message || !message.type) return;
+
+        switch (message.type) {
+          case "online_users":
+            console.log("[WS] Updating online users");
+            FetchUsers();  // <== Every tab does this individually
+            break;
+
+          case "new_post":
+            FetchPosts();
+            break;
+        }
+      };
+
+
+      port.onerror = (err) => {
+        console.error("[WS] SharedWorker port error:", err);
+      };
+
+    } catch (error) {
+      console.error("[WS] Failed to connect with SharedWorker:", error);
     }
-
-    // Initialize SharedWorker
-    worker = new SharedWorker("/public/js/ws-worker.js");
-    port = worker.port;
-
-    // Start the port communication
-    port.start();
-
-    console.log("[WS] SharedWorker initialized.");
-
-    // Handle incoming messages from the SharedWorker
-    port.onmessage = (e) => {
-      const message = e.data;
-      if (!message || !message.type) {
-        console.warn("[WS] Invalid message received", message);
-        return;
-      }
-
-      switch (message.type) {
-        case "new_post":
-          console.log("[WS] New post received:", message.data);
-          FetchPosts(); // Refresh posts
-          break;
-
-        case "online_users":
-          console.log("[WS] Online users update.");
-          FetchUsers(); // Hypothetical function to update user list
-          break;
-
-        case "chat_message":
-          console.log("[WS] New private message:", message.data);
-          // Handle chat message rendering (future)
-          break;
-
-        default:
-          console.warn("[WS] Unknown message type:", message.type);
-      }
-    };
-
-    port.onerror = (err) => {
-      console.error("[WS] SharedWorker port error:", err);
-    };
-
-  } catch (error) {
-    console.error("[WS] Failed to connect with SharedWorker:", error);
   }
-}
 
 
 
