@@ -1,5 +1,3 @@
-// File: public/js/createPost.js
-
 export async function createPostFunc() {
   try {
     const form = document.getElementById("post-form");
@@ -25,7 +23,7 @@ export async function createPostFunc() {
       window.location.href = "/"
     }
   } catch (error) {
-    alert("Unexpected error occurred");
+    BuildErrorPage(500, "Cannot connect to server.");
   }
 }
 
@@ -47,7 +45,7 @@ export async function FetchPosts() {
     });
 
     if (!response.ok) {
-      console.error("Failed to fetch posts.");
+      BuildErrorPage(401, "Unquthorized access");
       return;
     }
 
@@ -134,7 +132,7 @@ export async function FetchPosts() {
       mainContent.appendChild(postDiv);
     });
   } catch (error) {
-    console.error("An error occurred while fetching posts:", error);
+    BuildErrorPage(500, "Cannot connect to server.");
   }
 }
 
@@ -311,4 +309,64 @@ export function BuildMainPage() {
 
   chatBox.append(chatHeader, chatMessages, chatInput);
   body.appendChild(chatBox);
+}
+
+
+export function BuildErrorPage(code = 404, message = "Page Not Found") {
+  // 1. Clear the body
+  document.body.innerHTML = "";
+
+  // 2. Set background color manually if CSS is not loaded
+  document.body.style.backgroundColor = "var(--light)";
+  document.body.style.fontFamily = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+  document.body.style.margin = "0";
+
+  // 3. Create container
+  const container = document.createElement("div");
+  container.style.height = "100vh";
+  container.style.display = "flex";
+  container.style.flexDirection = "column";
+  container.style.justifyContent = "center";
+  container.style.alignItems = "center";
+  container.style.textAlign = "center";
+  container.style.padding = "40px";
+
+  // 4. Error Icon
+  const icon = document.createElement("div");
+  icon.innerHTML = "🚫";
+  icon.style.fontSize = "80px";
+  icon.style.marginBottom = "20px";
+
+  // 5. Error Code
+  const codeEl = document.createElement("h1");
+  codeEl.textContent = `${code} Error`;
+  codeEl.style.color = "var(--primary)";
+  codeEl.style.fontSize = "36px";
+  codeEl.style.margin = "0";
+
+  // 6. Message
+  const msg = document.createElement("p");
+  msg.textContent = message || "Something went wrong.";
+  msg.style.color = "#333";
+  msg.style.margin = "16px 0";
+  msg.style.fontSize = "18px";
+
+  // 7. Home Button
+  const button = document.createElement("a");
+  button.href = "/";
+  button.textContent = "Go back to home";
+  button.style.padding = "10px 16px";
+  button.style.borderRadius = "6px";
+  button.style.backgroundColor = "var(--primary)";
+  button.style.color = "white";
+  button.style.textDecoration = "none";
+  button.style.marginTop = "12px";
+  button.style.fontWeight = "600";
+  button.style.transition = "background-color 0.3s ease";
+  button.onmouseenter = () => button.style.backgroundColor = "#7a372b";
+  button.onmouseleave = () => button.style.backgroundColor = "var(--primary)";
+
+  // 8. Assemble
+  container.append(icon, codeEl, msg, button);
+  document.body.appendChild(container);
 }

@@ -1,4 +1,5 @@
 import { showLogin, showRegister } from "/public/js/switch.js";
+import { BuildErrorPage } from "/public/js/post.js";
 async function login(identifier, password) {
     try {
         const response = await fetch("/api/login", {
@@ -36,8 +37,7 @@ async function login(identifier, password) {
             }, 3000); // auto-close after 3 seconds
         }
     } catch (error) {
-        console.error("Login error:", error);
-        alert("Network error.");
+        BuildErrorPage(500, "Cannot connect to server.");
     }
 }
 

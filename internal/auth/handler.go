@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
+
 	"real-time/internal/hub"
 	"real-time/internal/view"
-	"time"
 )
 
 type Handler struct {
@@ -104,15 +105,18 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteStrictMode,
 		Expires:  time.Now().Add(24 * time.Hour), // Adjust session duration
 	})
-
 }
 
 func (h *Handler) LoggedInHandler(w http.ResponseWriter, r *http.Request) {
-	session_token, err := r.Cookie("session_token")
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
 
+	session_token, err := r.Cookie("session_token")
 	if err != nil {
-		error := erro.ErrBroadCast(http.StatusUnauthorized, "Unauthorized access")
-		w.WriteHeader(http.StatusUnauthorized)
+		error := erro.ErrBroadCast(http.StatusBadRequest, "Bad Request")
+		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"status_code": error.StatusCode,
 			"error":       error.ErrMessage,
@@ -122,7 +126,6 @@ func (h *Handler) LoggedInHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	// Get the user Id to check if hr's connected
 	userId, err := h.service.repo.GetUserIdBySession(session_token.Value)
-
 	if err != nil {
 		error := erro.ErrBroadCast(http.StatusUnauthorized, "Unauthorized access")
 		w.WriteHeader(http.StatusUnauthorized)
@@ -137,7 +140,6 @@ func (h *Handler) LoggedInHandler(w http.ResponseWriter, r *http.Request) {
 	// after the user id we'll retrieve the user name
 
 	userName, err := h.service.repo.GetUserNameById(userId)
-
 	if err != nil {
 		error := erro.ErrBroadCast(http.StatusInternalServerError, "Internal Server Error")
 		w.WriteHeader(http.StatusInternalServerError)
@@ -156,7 +158,7 @@ func (h *Handler) LoggedInHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (h *Handler) LogOutHandler(w http.ResponseWriter, r *http.Request){
+func (h *Handler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -174,7 +176,6 @@ func (h *Handler) LogOutHandler(w http.ResponseWriter, r *http.Request){
 	}
 
 	err = h.service.repo.DeleteSession(session_token.Value)
-
 	if err != nil {
 		error := erro.ErrBroadCast(http.StatusUnauthorized, "Unautherized Access")
 		w.WriteHeader(http.StatusUnauthorized)
@@ -185,7 +186,6 @@ func (h *Handler) LogOutHandler(w http.ResponseWriter, r *http.Request){
 		})
 		return
 	}
-
 }
 
 func (h *Handler) FormHandler(w http.ResponseWriter, r *http.Request) {
