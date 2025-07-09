@@ -217,3 +217,98 @@ export async function CreatePostDOM() {
     createPostFunc();
   });
 }
+
+export function BuildMainPage() {
+  const body = document.body;
+
+   const links = document.querySelectorAll('link[rel="stylesheet"]');
+  for (const link of links) {
+    if (link.href.includes("register.css")) {
+      link.parentNode.removeChild(link);
+    }
+  }
+
+  // ===== NAVBAR =====
+  const navbar = document.createElement("div");
+  navbar.className = "navbar";
+
+  const brand = document.createElement("div");
+  brand.className = "brand";
+  brand.innerHTML = `<i class="fa-solid fa-comments"></i> Weroom`;
+
+  const userInfo = document.createElement("div");
+  userInfo.className = "user-info";
+
+  const nickname = document.createElement("span");
+  nickname.id = "nickname";
+
+  const authLink = document.createElement("a");
+  authLink.href = "/auth";
+  authLink.id = "authenticate";
+  authLink.className = "navbar-button";
+  authLink.innerHTML = `<i class="fa-solid fa-right-from-bracket"></i> Login`;
+
+  userInfo.append(nickname, authLink);
+  navbar.append(brand, userInfo);
+  body.appendChild(navbar);
+
+  // ===== LAYOUT WRAPPER (wraps sidebar + main-content) =====
+  const layout = document.createElement("div");
+  layout.className = "layout";
+
+  // ===== SIDEBAR =====
+  const sidebar = document.createElement("div");
+  sidebar.className = "sidebar";
+
+  const sidebarTitle = document.createElement("h3");
+  sidebarTitle.textContent = "Users";
+
+  const userList = document.createElement("ul");
+  userList.className = "user-list";
+
+  sidebar.append(sidebarTitle, userList);
+
+  // ===== MAIN CONTENT =====
+  const mainContent = document.createElement("div");
+  mainContent.className = "main-content";
+  mainContent.id = "main-content";
+  // You can add placeholder if you want
+  mainContent.innerHTML = "<!-- Data will be filled here incha'allah -->";
+
+  layout.append(sidebar, mainContent);
+  body.appendChild(layout); // Append layout after navbar
+
+  // ===== CHAT BOX =====
+  const chatBox = document.createElement("div");
+  chatBox.className = "chat-box";
+
+  const chatHeader = document.createElement("div");
+  chatHeader.className = "chat-header";
+  chatHeader.innerHTML = `<i class="fa-solid fa-comment-dots"></i> Messages`;
+
+  const chatMessages = document.createElement("div");
+  chatMessages.className = "chat-messages";
+
+  const msg1 = document.createElement("p");
+  msg1.innerHTML = `<strong>Ryad:</strong> Hello!`;
+
+  const msg2 = document.createElement("p");
+  msg2.innerHTML = `<strong>You:</strong> Hey, what's up?`;
+
+  chatMessages.append(msg1, msg2);
+
+  const chatInput = document.createElement("div");
+  chatInput.className = "chat-input";
+
+  const chatInputField = document.createElement("input");
+  chatInputField.type = "text";
+  chatInputField.placeholder = "Type a message...";
+
+  const chatSendBtn = document.createElement("button");
+  chatSendBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i>`;
+
+  chatInput.append(chatInputField, chatSendBtn);
+
+  chatBox.append(chatHeader, chatMessages, chatInput);
+  body.appendChild(chatBox);
+}

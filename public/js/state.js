@@ -1,5 +1,6 @@
-import { CreatePostDOM, FetchPosts } from "/public/js/post.js";
+import { CreatePostDOM, FetchPosts, BuildMainPage } from "/public/js/post.js";
 import { FetchUsers, BuildProfile } from "/public/js/users.js";
+import { BuildLoginPage } from "/public/js/login.js"
 let worker;
 let port;
 document.addEventListener("DOMContentLoaded", async () => {
@@ -17,12 +18,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  FetchPosts()
-
   const user = await checkIfLoggedIn();
 
 
-  if (!user) return;
+  if (!user){
+    BuildLoginPage();
+    return
+  }
+
+  BuildMainPage();
+
+  FetchPosts();
+
 
   BuildProfile(user)
 
