@@ -156,6 +156,38 @@ func (h *Handler) LoggedInHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (h *Handler) LogOutHandler(w http.ResponseWriter, r *http.Request){
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	session_token, err := r.Cookie("session_token")
+	if err != nil {
+		error := erro.ErrBroadCast(http.StatusUnauthorized, "Unautherized Access")
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"status_code": error.StatusCode,
+			"error":       error.ErrMessage,
+			"state":       "false",
+		})
+		return
+	}
+
+	err = h.service.repo.DeleteSession(session_token.Value)
+
+	if err != nil {
+		error := erro.ErrBroadCast(http.StatusUnauthorized, "Unautherized Access")
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"status_code": error.StatusCode,
+			"error":       error.ErrMessage,
+			"state":       "false",
+		})
+		return
+	}
+
+}
+
 func (h *Handler) FormHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)

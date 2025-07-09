@@ -3,6 +3,7 @@ package auth
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"strconv"
 	"time"
 )
@@ -16,6 +17,7 @@ type UserRepository interface {
 	GetUserNameById(userId string) (string, error)
 	CreateUser(user *User) error
 	FindSessionByID(userId string)
+	DeleteSession(session_token string) error
 }
 
 type sqliteUserRepo struct {
@@ -111,7 +113,6 @@ func (r *sqliteUserRepo) GetUserNameById(userId string) (string, error) {
 
 	var userName string
 	err := r.db.QueryRow(query, userId).Scan(&userName)
-
 	if err != nil {
 		return "", errors.New("error retrieving data")
 	}
@@ -140,4 +141,24 @@ func (r *sqliteUserRepo) FindSessionByID(userId string) {
 		// Log or handle delete error
 		return
 	}
+}
+
+func (r *sqliteUserRepo) DeleteSession(session_token string) error {
+	query := `DELETE FROM Session WHERE UUID = ?`
+
+	result, err := r.db.Exec(query, session_token)
+	if err != nil {
+		return fmt.Errorf("failed to delete session: %v", err)
+	}
+
+	// Check if a row was actually deleted
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to check affected rows: %v", err)
+	}
+	if rowsAffected == 0 {
+		return fmt.Errorf("no session found with UUID: %s", session_token)
+	}
+	fmt.Println("deleted")
+	return nil
 }

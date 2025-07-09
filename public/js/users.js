@@ -24,6 +24,7 @@ function renderUserList(users) {
 
   users.forEach(user => {
     const li = document.createElement("li");
+    
 
     // Create the icon + name container
     const userInfo = document.createElement("div");
@@ -57,5 +58,19 @@ export async function BuildProfile(user) {
     nickname.innerHTML = `<i class="fa-solid fa-user"></i> ${user.nickname}`
 
     actionBtn.innerHTML = `<i class="fa-solid fa-right-from-bracket"></i> Logout`
-    actionBtn.href = "/somewhere else"
+    actionBtn.href = ""
+    actionBtn.addEventListener("click", async ()=>{
+      const response = await fetch("/api/logout", {
+        method: "post",
+        headers: {
+          "credntials": "include"
+        },
+      })
+      if (response.ok){
+        window.location.href = "/"
+        
+      } else {
+        console.log(response.body);
+      }
+    })
 }
