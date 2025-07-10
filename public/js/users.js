@@ -1,3 +1,7 @@
+let messageOffset = 0;
+let loadingOldMessages = false;
+let allMessagesLoaded = false;
+
 export async function FetchUsers() {
   try {
     const response = await fetch("/api/users", {
@@ -100,39 +104,77 @@ async function fetchChatHistory(userId, offset = 0, limit = 10) {
   }
 }
 
-function renderMessages(messages, chatMessagesContainer, user) {
-  chatMessagesContainer.innerHTML = ""; // Clear previous messages
-
-  messages.reverse().forEach(msg => {
-    const msgElem = document.createElement("p");
+function renderMessages(messages, chatMessagesContainer, user, { prepend = false } = {}) {
+  // Sort by message ID ascending
+  messages.sort((a, b) => a.id - b.id);
+  
+  if (loadingOldMessages) {
+    messages.sort((a, b) => b.id - a.id);
     
+  }
 
-    // Style differently depending on sender (assuming currentUserId is your user ID)
-    const isSentByGuesttUser = msg.SenderId === user.UserId;
+  messages.forEach(msg => {
+    const isSentByGuestUser = msg.SenderId === user.UserId;
 
-    console.log(user.UserId);
-    
+    // Create message wrapper
+    const wrapper = document.createElement("div");
+    wrapper.className = "msg-wrapper";
+    wrapper.style.display = "flex";
+    wrapper.style.flexDirection = "column";
+    wrapper.style.alignItems = isSentByGuestUser ? "flex-end" : "flex-start";
+    wrapper.style.margin = "6px 0";
 
-    msgElem.innerHTML = `<strong>${isSentByGuesttUser ? user.Nickname : "You"}:</strong> ${msg.content}`;
-    msgElem.style.textAlign = isSentByGuesttUser ? "right" : "left";
-    msgElem.style.background = isSentByGuesttUser ? "#dcf8c6" : "#fff";
-    msgElem.style.padding = "6px 10px";
-    msgElem.style.borderRadius = "10px";
-    msgElem.style.margin = "4px 0";
-    msgElem.style.maxWidth = "70%";
-    msgElem.style.marginLeft = isSentByGuesttUser ? "auto" : "0";
-    msgElem.style.marginRight = isSentByGuesttUser ? "0" : "auto";
+    // Create message bubble
+    const msgBubble = document.createElement("div");
+    msgBubble.className = "msg-bubble";
+    msgBubble.style.backgroundColor = isSentByGuestUser ? "#dcf8c6" : "#ffffff";
+    msgBubble.style.color = "#333";
+    msgBubble.style.padding = "10px 14px";
+    msgBubble.style.borderRadius = "12px";
+    msgBubble.style.maxWidth = "70%";
+    msgBubble.style.boxShadow = "0 1px 3px rgba(0,0,0,0.1)";
+    msgBubble.style.wordWrap = "break-word";
 
-    chatMessagesContainer.appendChild(msgElem);
+    // Sender and content
+    msgBubble.innerHTML = `
+      <div style="font-weight: bold; font-size: 13px; color: #444;">${isSentByGuestUser ? user.Nickname : "You"}</div>
+      <div style="margin-top: 4px; font-size: 14px;">${msg.content}</div>
+    `;
+
+    // Create timestamp
+    const timeElem = document.createElement("div");
+    timeElem.className = "msg-time";
+    const date = new Date(msg.created_at);
+    const formattedTime = date.toLocaleString(undefined, {
+      hour: "2-digit",
+      minute: "2-digit",
+      day: "2-digit",
+      month: "short",
+      year: "numeric"
+    });
+    timeElem.textContent = formattedTime;
+    timeElem.style.fontSize = "11px";
+    timeElem.style.color = "#888";
+    timeElem.style.marginTop = "4px";
+
+    // Assemble message
+    wrapper.appendChild(msgBubble);
+    wrapper.appendChild(timeElem);
+
+    // Append or prepend to chat container
+    if (prepend) {
+      chatMessagesContainer.prepend(wrapper);
+    } else {
+      chatMessagesContainer.appendChild(wrapper);
+    }
   });
-
-  // Scroll to bottom so latest messages are visible
-  chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
 }
+
+
 
 async function openChatBox(user) {
   console.log("fucking user ", user);
-  
+
   // Remove any existing chat box
   const existingChat = document.querySelector(".chat-box");
   if (existingChat) existingChat.remove();
@@ -192,9 +234,44 @@ async function openChatBox(user) {
   chatMessages.style.borderTop = "1px solid #eee";
   chatMessages.style.borderBottom = "1px solid #eee";
 
-  // Fetch and render messages here:
-  const messages = await fetchChatHistory(user.UserId, 0, 10);
+  // Initial load
+  const messages = await fetchChatHistory(user.UserId, messageOffset, 10);
+  messageOffset += messages.length;
   renderMessages(messages, chatMessages, user);
+
+  // Scroll to bottom initially
+  requestAnimationFrame(() => {
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  });
+
+  chatMessages.addEventListener("scroll", async () => {
+    if (chatMessages.scrollTop === 0 && !loadingOldMessages && !allMessagesLoaded) {
+      loadingOldMessages = true;
+
+      const previousHeight = chatMessages.scrollHeight;
+
+      const moreMessages = await fetchChatHistory(user.UserId, messageOffset, 10);
+
+        
+
+      if (moreMessages.length === 0) {
+        allMessagesLoaded = true;
+        return;
+      }
+
+      messageOffset += moreMessages.length;
+      renderMessages(moreMessages, chatMessages, user, { prepend: true });
+
+      // Maintain scroll position
+      requestAnimationFrame(() => {
+        chatMessages.scrollTop = chatMessages.scrollHeight - previousHeight;
+      });
+
+      loadingOldMessages = false;
+    }
+  });
+
+
 
   const chatInput = document.createElement("div");
   chatInput.className = "chat-input";
@@ -230,3 +307,43 @@ async function openChatBox(user) {
   chatBox.append(chatHeader, chatMessages, chatInput);
   document.body.appendChild(chatBox);
 }
+
+function throttle(fn, limit) {
+  let inThrottle;
+  return function (...args) {
+    if (!inThrottle) {
+      fn.apply(this, args);
+      inThrottle = true;
+      setTimeout(() => (inThrottle = false), limit);
+    }
+  };
+}
+
+const throttledScrollHandler = throttle(async function () {
+  if (
+    chatMessages.scrollTop + chatMessages.clientHeight >= chatMessages.scrollHeight &&
+    !loadingOldMessages &&
+    !allMessagesLoaded
+  ) {
+    loadingOldMessages = true;
+
+    const previousHeight = chatMessages.scrollHeight;
+
+    let moreMessages = await fetchChatHistory(user.UserId, messageOffset, 10);
+    moreMessages.sort((a, b) => b.id - a.id); // DESC: newest first
+
+    if (moreMessages.length === 0) {
+      allMessagesLoaded = true;
+      return;
+    }
+
+    messageOffset += moreMessages.length;
+    renderMessages(moreMessages, chatMessages, user, { prepend: false }); // append at end
+
+    requestAnimationFrame(() => {
+      chatMessages.scrollTop = previousHeight;
+    });
+
+    loadingOldMessages = false;
+  }
+}, 400);

@@ -13,7 +13,7 @@ type MessageRepositoryLayer interface {
 	GetLastMessage(user1ID, user2ID int) (*Message, error)
 	MarkMessagesAsRead(senderID, receiverID int) error
 	GetUnreadMessageCount(userID int) (int, error)
-	GetUnreadMessages(userID int) ([]*Message, error) 
+	GetUnreadMessages(userID int) ([]*Message, error)
 	GetUserIdBySession(token string) (string, error)
 	GetUserById(id string) bool
 }
@@ -59,7 +59,6 @@ func (r *MessageRepository) GetChatHistory(client string, guest, offset, limit i
 		if err := rows.Scan(&msg.Id, &msg.Content, &msg.SenderId, &msg.RecieverId, &msg.IsRead, &msg.CreatedAt); err != nil {
 			return nil, err
 		}
-		fmt.Println(msg.RecieverId)
 		messages = append(messages, msg)
 	}
 
