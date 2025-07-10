@@ -2,7 +2,6 @@ package messages
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -17,7 +16,7 @@ func NewHandler(messSer *MessagesService) *Handler {
 	return &Handler{Service: messSer}
 }
 
-func (h *Handler) InsertMessage(w http.ResponseWriter, r *http.Request){
+func (h *Handler) InsertMessage(w http.ResponseWriter, r *http.Request) {
 	session_token, err := r.Cookie("session_token")
 	if err != nil {
 		http.Error(w, "Unauthorized Access", http.StatusUnauthorized)
@@ -30,8 +29,20 @@ func (h *Handler) InsertMessage(w http.ResponseWriter, r *http.Request){
 	}
 	var Msg Message
 	Msg.SenderId = userId
+
 	json.NewDecoder(r.Body).Decode(&Msg)
-	fmt.Println(Msg)
+	// check if receiever exists and skip sending message to himself
+	if userId == Msg.RecieverId {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+	if h.Service.MessageRepo.GetUserById(Msg.RecieverId) {
+
+		h.Service.MessageRepo.InsertMessage(&Msg)
+	} else {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
 
 }
 

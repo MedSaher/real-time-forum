@@ -285,40 +285,6 @@ export function BuildMainPage() {
 
   layout.append(sidebar, mainContent);
   body.appendChild(layout); // Append layout after navbar
-
-  // ===== CHAT BOX =====
-  const chatBox = document.createElement("div");
-  chatBox.className = "chat-box";
-
-  const chatHeader = document.createElement("div");
-  chatHeader.className = "chat-header";
-  chatHeader.innerHTML = `<i class="fa-solid fa-comment-dots"></i> Messages`;
-
-  const chatMessages = document.createElement("div");
-  chatMessages.className = "chat-messages";
-
-  const msg1 = document.createElement("p");
-  msg1.innerHTML = `<strong>Ryad:</strong> Hello!`;
-
-  const msg2 = document.createElement("p");
-  msg2.innerHTML = `<strong>You:</strong> Hey, what's up?`;
-
-  chatMessages.append(msg1, msg2);
-
-  const chatInput = document.createElement("div");
-  chatInput.className = "chat-input";
-
-  const chatInputField = document.createElement("input");
-  chatInputField.type = "text";
-  chatInputField.placeholder = "Type a message...";
-
-  const chatSendBtn = document.createElement("button");
-  chatSendBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i>`;
-
-  chatInput.append(chatInputField, chatSendBtn);
-
-  chatBox.append(chatHeader, chatMessages, chatInput);
-  body.appendChild(chatBox);
 }
 
 

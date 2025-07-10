@@ -13,8 +13,9 @@ type MessageRepositoryLayer interface {
 	GetLastMessage(user1ID, user2ID int) (*Message, error)
 	MarkMessagesAsRead(senderID, receiverID int) error
 	GetUnreadMessageCount(userID int) (int, error)
-	GetUnreadMessages(userID int) ([]*Message, error)
+	GetUnreadMessages(userID int) ([]*Message, error) 
 	GetUserIdBySession(token string) (string, error)
+	GetUserById(id string) bool
 }
 
 // MessageRepository is the concrete implementation
@@ -58,6 +59,7 @@ func (r *MessageRepository) GetChatHistory(client string, guest, offset, limit i
 		if err := rows.Scan(&msg.Id, &msg.Content, &msg.SenderId, &msg.RecieverId, &msg.IsRead, &msg.CreatedAt); err != nil {
 			return nil, err
 		}
+		fmt.Println(msg.RecieverId)
 		messages = append(messages, msg)
 	}
 
@@ -156,4 +158,11 @@ func (r *MessageRepository) GetUserIdBySession(token string) (string, error) {
 	}
 
 	return userId, nil
+}
+
+func (r *MessageRepository) GetUserById(id string) bool {
+	query := `SELECT id FROM users WHERE id = ?`
+	var dummy string
+	err := r.db.QueryRow(query, id).Scan(&dummy)
+	return err == nil
 }
