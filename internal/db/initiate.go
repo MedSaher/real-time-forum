@@ -82,6 +82,17 @@ INSERT INTO Category (Name, Description) VALUES
 ('Lifestyle & Health', 'Conversations about fitness, mental health, diet, and daily life.'),
 ('Entertainment', 'Movies, TV shows, music, and celebrity news discussions.'),
 ('General Discussion', 'A category for off-topic discussions and community interactions.');
+
+-- create private Messages
+    CREATE TABLE IF NOT EXISTS private_messages (
+    ID INTEGER PRIMARY KEY AUTOINCREMENT,
+    content TEXT NOT NULL,
+    sender_id INTEGER NOT NULL,
+    receiver_id INTEGER NOT NULL,
+    is_read BOOLEAN DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (sender_id) REFERENCES users(ID) ON DELETE CASCADE,
+    FOREIGN KEY (receiver_id) REFERENCES users(ID) ON DELETE CASCADE);
 `
 
 // Create the database schema:

@@ -41,6 +41,57 @@ async function login(identifier, password) {
     }
 }
 
+async function register(nickname, age, gender, firstname, lastname, email, password) {
+    try {
+        
+        const response = await fetch("/api/register", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            credentials: "include",
+            body: JSON.stringify({
+                nickname: nickname,
+                age: String(age),
+                gender: gender,
+                first_name: firstname,
+                last_name: lastname,
+                email: email,
+                password: password
+            })
+        });
+
+        // console.log(resp);
+        
+
+        if (response.ok) {
+            // Redirect to home page
+            window.location.href = "/";
+        } else {
+            const modal = document.getElementById('popup-modal');
+            const icon = document.getElementById('modal-icon');
+            const text = document.getElementById('modal-message');
+
+            const error = await response.json();
+
+            modal.className = 'modal error'
+            icon.className = 'fa-solid fa-triangle-exclamation'
+            text.textContent = error.error
+
+            modal.style.display = 'flex';
+
+            console.log(error.error)
+
+            setTimeout(() => {
+                closeModal();
+            }, 3000); // auto-close after 3 seconds
+        }
+    } catch (error) {
+        console.error("Login error:", error);
+        alert("Network error.");
+    }
+}
+
 function closeModal() {
     document.getElementById('popup-modal').style.display = 'none';
 }
@@ -216,6 +267,22 @@ export function BuildLoginPage() {
     registerBtn.type = "submit";
     registerBtn.textContent = "Register";
     registerForm.appendChild(registerBtn);
+
+    registerForm.addEventListener("submit", async (e) => {
+    e.preventDefault(); // Prevent default form submission
+
+    // Collect form values
+    const nickname = document.getElementById("register-nickname").value.trim();
+    const age = parseInt(document.getElementById("register-age").value.trim());
+    const gender = document.getElementById("register-gender").value;
+    const firstname = document.getElementById("register-firstname").value.trim();
+    const lastname = document.getElementById("register-lastname").value.trim();
+    const email = document.getElementById("register-email").value.trim();
+    const password = document.getElementById("register-password").value;
+
+    // Call the async register function
+    await register(nickname, age, gender, firstname, lastname, email, password);
+});
 
     // Switch to login
     const registerSwitch = document.createElement("p");

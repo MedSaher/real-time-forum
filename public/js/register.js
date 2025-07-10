@@ -22,6 +22,8 @@ registerForm.addEventListener("submit", async (e) => {
 
 async function register(nickname, age, gender, firstname, lastname, email, password) {
     try {
+        console.log("here");
+        
         const response = await fetch("/api/register", {
             method: "POST",
             headers: {
@@ -39,9 +41,12 @@ async function register(nickname, age, gender, firstname, lastname, email, passw
             })
         });
 
+        // console.log(resp);
         
 
         if (response.ok) {
+            const data = await response.json()
+            alert(data)
             // Redirect to home page
             window.location.href = "/";
         } else {
