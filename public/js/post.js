@@ -47,19 +47,20 @@ export async function FetchPosts() {
     });
 
     if (!response.ok) {
-      BuildErrorPage(401, "Unquthorized access");
+      BuildErrorPage(401, "Unauthorized access");
       return;
     }
-
+    
     const posts = await response.json();
-
-    if (posts.length === 0) {
+    console.log(posts);
+    
+    if (posts === null) {
       const emptyMsg = document.createElement("p");
       emptyMsg.textContent = "No posts yet.";
       mainContent.appendChild(emptyMsg);
       return;
     }
-
+    
     posts.forEach((post) => {
       // console.log(post.id);
       
@@ -140,6 +141,7 @@ export async function FetchPosts() {
       mainContent.appendChild(postDiv);
     });
   } catch (error) {
+    console.log("fucking shit")
     BuildErrorPage(500, "Cannot connect to server.");
   }
 }

@@ -84,6 +84,7 @@ func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) FetchPosts(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
+		fmt.Println("here 1")
 		erro.ErrBroadCast(http.StatusMethodNotAllowed, "Method not allowed")
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]interface{}{
@@ -100,6 +101,7 @@ func (h *Handler) FetchPosts(w http.ResponseWriter, r *http.Request) {
 	}
 	_, err = h.Service.repo.GetUserIdBySession(session_token.Value)
 	if err != nil {
+		fmt.Println("here 3")
 		http.Error(w, "Unauthorized Access", http.StatusUnauthorized)
 		return
 	}

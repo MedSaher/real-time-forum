@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"real-time/internal/auth"
 	"real-time/internal/hub"
+	"real-time/internal/messages"
 	"real-time/internal/post"
 	"real-time/internal/users"
 )
@@ -40,7 +41,7 @@ func SetupRoutes(db *sql.DB) *http.ServeMux {
 	mux.HandleFunc("/api/register", authHandler.RegisterHandler)
 	mux.HandleFunc("/api/session", authHandler.LoggedInHandler)
 	mux.HandleFunc("/api/login", authHandler.LoginHandler)
-	mux.HandleFunc("/api/logout", authHandler.LogOutHandler)
+	mux.HandleFunc("/auth", authHandler.FormHandler)
 	mux.HandleFunc("/", authHandler.MainHandler)
 
 	// Initialize the post layer components
@@ -51,15 +52,22 @@ func SetupRoutes(db *sql.DB) *http.ServeMux {
 	// Post routes
 	mux.HandleFunc("/api/add_post", postHandler.CreatePost)
 	mux.HandleFunc("/api/fetch_posts", postHandler.FetchPosts)
-	mux.HandleFunc("/api/add_comment", postHandler.CommentHandler)
 
-	// initialize users layers 
+	// initialize users layers
 	usersRepo := users.NewRepository(db)
 	usersService := users.NewService(usersRepo)
 	usersHandler := users.NewHandler(usersService, hubS)
 
-	// users routes 
+	// users routes
 	mux.HandleFunc("/api/users", usersHandler.UsersHandler)
+
+	// initialize messages layers
+	msgsRepo := messages.NewRepository(db)
+	msgsService := messages.NewService(msgsRepo)
+	msgsHandler := messages.NewHandler(msgsService)
+
+	mux.HandleFunc("/api/send_message", msgsHandler.InsertMessage)
+
 	// Other module routes would be registered similarly
 	// mux.HandleFunc("/api/posts", postsHandler.PostsHandler)
 	// mux.HandleFunc("/api/chat/ws", chatHandler.WebSocketHandler)
