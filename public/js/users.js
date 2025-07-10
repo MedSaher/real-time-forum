@@ -173,11 +173,14 @@ function renderMessages(messages, chatMessagesContainer, user, { prepend = false
 
 
 async function openChatBox(user) {
-  console.log("fucking user ", user);
+
 
   // Remove any existing chat box
   const existingChat = document.querySelector(".chat-box");
-  if (existingChat) existingChat.remove();
+  if (existingChat) {
+    messageOffset = 0
+    existingChat.remove()
+  };
 
   // Create chat container (your existing code) ...
   const chatBox = document.createElement("div");
@@ -244,32 +247,34 @@ async function openChatBox(user) {
     chatMessages.scrollTop = chatMessages.scrollHeight;
   });
 
-  chatMessages.addEventListener("scroll", async () => {
+  const throttledScrollHandler = throttle(async function () {
     if (chatMessages.scrollTop === 0 && !loadingOldMessages && !allMessagesLoaded) {
       loadingOldMessages = true;
-
+  
       const previousHeight = chatMessages.scrollHeight;
-
+  
       const moreMessages = await fetchChatHistory(user.UserId, messageOffset, 10);
-
+  
         
-
+  
       if (moreMessages.length === 0) {
         allMessagesLoaded = true;
         return;
       }
-
+  
       messageOffset += moreMessages.length;
       renderMessages(moreMessages, chatMessages, user, { prepend: true });
-
+  
       // Maintain scroll position
       requestAnimationFrame(() => {
         chatMessages.scrollTop = chatMessages.scrollHeight - previousHeight;
       });
-
+  
       loadingOldMessages = false;
     }
-  });
+  }, 400);
+
+  chatMessages.addEventListener("scroll", throttledScrollHandler);
 
 
 
@@ -309,41 +314,24 @@ async function openChatBox(user) {
 }
 
 function throttle(fn, limit) {
-  let inThrottle;
-  return function (...args) {
-    if (!inThrottle) {
-      fn.apply(this, args);
-      inThrottle = true;
-      setTimeout(() => (inThrottle = false), limit);
-    }
-  };
-}
+  let inThrottle = false;
+  let lastArgs = null;
 
-const throttledScrollHandler = throttle(async function () {
-  if (
-    chatMessages.scrollTop + chatMessages.clientHeight >= chatMessages.scrollHeight &&
-    !loadingOldMessages &&
-    !allMessagesLoaded
-  ) {
-    loadingOldMessages = true;
-
-    const previousHeight = chatMessages.scrollHeight;
-
-    let moreMessages = await fetchChatHistory(user.UserId, messageOffset, 10);
-    moreMessages.sort((a, b) => b.id - a.id); // DESC: newest first
-
-    if (moreMessages.length === 0) {
-      allMessagesLoaded = true;
+  return async function throttled(...args) {
+    if (inThrottle) {
+      lastArgs = args; // Save latest args to run after throttle period
       return;
     }
 
-    messageOffset += moreMessages.length;
-    renderMessages(moreMessages, chatMessages, user, { prepend: false }); // append at end
+    inThrottle = true;
+    await fn.apply(this, args);
 
-    requestAnimationFrame(() => {
-      chatMessages.scrollTop = previousHeight;
-    });
-
-    loadingOldMessages = false;
-  }
-}, 400);
+    setTimeout(async () => {
+      inThrottle = false;
+      if (lastArgs) {
+        await throttled.apply(this, lastArgs);
+        lastArgs = null;
+      }
+    }, limit);
+  };
+}
