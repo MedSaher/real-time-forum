@@ -17,7 +17,7 @@ export async function FetchUsers() {
       console.log("Something went wrong fetching users.");
     }
   } catch (error) {
-    console.log("Network error or server failure.");
+    console.log("Network error or server failure.", error);
   }
 }
 

@@ -97,22 +97,6 @@ export async function FetchPosts() {
       const reactions = document.createElement("div");
       reactions.className = "post-reactions";
 
-      // Like span
-      const likeSpan = document.createElement("span");
-      likeSpan.className = "like";
-      const likeIcon = document.createElement("i");
-      likeIcon.className = "fa-solid fa-thumbs-up";
-      likeSpan.appendChild(likeIcon);
-      likeSpan.appendChild(document.createTextNode(` ${post.likeCount}`));
-
-      // Dislike span
-      const dislikeSpan = document.createElement("span");
-      dislikeSpan.className = "dislike";
-      const dislikeIcon = document.createElement("i");
-      dislikeIcon.className = "fa-solid fa-thumbs-down";
-      dislikeSpan.appendChild(dislikeIcon);
-      dislikeSpan.appendChild(document.createTextNode(` ${post.dislikeCount}`));
-
       // Comment span
       const commentSpan = document.createElement("span");
       commentSpan.className = "comment";
@@ -126,8 +110,6 @@ export async function FetchPosts() {
 
 
       // Append all spans to reactions container
-      reactions.appendChild(likeSpan);
-      reactions.appendChild(dislikeSpan);
       reactions.appendChild(commentSpan);
 
 
