@@ -50,6 +50,7 @@ export async function FetchUsers() {
 }
 
 function renderUserList(users) {
+  
   const userList = document.querySelector(".user-list");
   userList.innerHTML = ""; // Clear existing content
 
@@ -126,7 +127,6 @@ export async function BuildProfile(user) {
       },
     })
     if (response.ok) {
-      alert("went well")
       window.location.href = "/"
 
     } else {

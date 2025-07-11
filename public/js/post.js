@@ -53,7 +53,6 @@ export async function FetchPosts() {
     }
     
     const posts = await response.json();
-    console.log(posts);
     
     if (posts === null) {
       const emptyMsg = document.createElement("p");
@@ -63,7 +62,6 @@ export async function FetchPosts() {
     }
     
     posts.forEach((post) => {
-      // console.log(post.id);
       
       const postDiv = document.createElement("div");
       postDiv.className = "post";
@@ -124,7 +122,6 @@ export async function FetchPosts() {
       mainContent.appendChild(postDiv);
     });
   } catch (error) {
-    console.log("fucking shit")
     BuildErrorPage(500, "Cannot connect to server.");
   }
 }

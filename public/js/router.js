@@ -31,9 +31,4 @@ export class Router {
   setNotFound(handler) {
     this.notFound = handler;
   }
-
-  // Optional: match dynamic routes like /posts/:id
-  match(path) {
-    // Advanced: add later if needed
-  }
 }

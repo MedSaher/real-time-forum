@@ -19,7 +19,6 @@ export async function renderHome() {
     return;
   }
 
-  // userId = user.user_id
 
   BuildMainPage();            // Layout
   FetchPosts();               // Load forum posts
