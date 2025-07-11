@@ -20,6 +20,11 @@ func NewHandler(messSer *Service, hub *hub.Hub) *Handler {
 }
 
 func (h *Handler) InsertMessage(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	session_token, err := r.Cookie("session_token")
 	if err != nil {
 		http.Error(w, "Unauthorized Access", http.StatusUnauthorized)
@@ -109,6 +114,32 @@ func (h *Handler) GetChatHistoryHandler(w http.ResponseWriter, r *http.Request) 
 	json.NewEncoder(w).Encode(messages)
 }
 
+func (h *Handler) NotifsHandler(w http.ResponseWriter, r *http.Request){
+if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	session_token, err := r.Cookie("session_token")
+	if err != nil {
+		http.Error(w, "Unauthorized Access", http.StatusUnauthorized)
+		return
+	}
+	userId, err := h.Service.MessageRepo.GetUserIdBySession(session_token.Value)
+	if err != nil {
+		http.Error(w, "Unauthorized Access", http.StatusUnauthorized)
+		return
+	}
+
+	messages, err := h.Service.MessageRepo.GetUnreadMessages(userId)
+
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	json.NewEncoder(w).Encode(&messages)
+}
+
 // Mark a message as read:
 // func (h *Handler) MarkMessageAsRead(w http.ResponseWriter, r *http.Request) {
 // 	fromIDStr := r.URL.Query().Get("from_id")
@@ -124,7 +155,7 @@ func (h *Handler) GetChatHistoryHandler(w http.ResponseWriter, r *http.Request) 
 // 		return
 // 	}
 
-// 	userID, err := h.SessServ.GetUserIdFromSession(cookie.Value)
+// 	userID, err := h.Service.MessageRepo.GetUserIdBySession(cookie.Value)
 // 	if err != nil {
 // 		utils.ResponseJSON(w, http.StatusUnauthorized, map[string]any{"message": "Invalid session"})
 // 		return

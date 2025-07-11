@@ -7,15 +7,24 @@ export let userOpened
 
 export async function FetchUsers() {
   try {
-    const response = await fetch("/api/users", {
-      method: "POST",
-      credentials: "include", // Correct placement of credentials
-    });
+    const [usersResponse, notificationsResponse] = await Promise.all([
+      fetch("/api/users", {
+        method: "POST",
+        credentials: "include",
+      }),
+      fetchUnreadNotifications()
+    ]);
 
-    if (response.ok) {
-      const data = await response.json();
-      console.log(data); // You can remove this in production
-      renderUserList(data); // Update the DOM
+    if (usersResponse.ok) {
+      const users = await usersResponse.json();
+      // Add unread counts to each user
+      const usersWithUnreadCounts = users.map(user => ({
+        ...user,
+        unreadCount: notificationsResponse.filter(n => 
+          n.SenderId === user.UserId && !n.is_read
+        ).length
+      }));
+      renderUserList(usersWithUnreadCounts);
     } else {
       console.log("Something went wrong fetching users.");
     }
@@ -23,7 +32,6 @@ export async function FetchUsers() {
     console.log("Network error or server failure.", error);
   }
 }
-
 
 function renderUserList(users) {
   const userList = document.querySelector(".user-list");
@@ -36,11 +44,32 @@ function renderUserList(users) {
     const userInfo = document.createElement("div");
     userInfo.className = "users-info";
     userInfo.style.cursor = "pointer";
+    userInfo.style.display = "flex";
+    userInfo.style.alignItems = "center";
+    userInfo.style.gap = "8px";
 
     const icon = document.createElement("i");
     icon.className = "fa-solid fa-circle-user";
 
-    const name = document.createTextNode(user.Nickname);
+    const name = document.createElement("span");
+    name.textContent = user.Nickname;
+
+    // Create unread count badge
+    if (user.unreadCount > 0) {
+      const unreadBadge = document.createElement("span");
+      unreadBadge.className = "unread-badge";
+      unreadBadge.textContent = user.unreadCount;
+      unreadBadge.style.backgroundColor = "#4a90e2";
+      unreadBadge.style.color = "white";
+      unreadBadge.style.borderRadius = "50%";
+      unreadBadge.style.fontSize = "12px";
+      unreadBadge.style.width = "25px";
+      unreadBadge.style.height = "25px";
+      unreadBadge.style.display = "flex";
+      unreadBadge.style.alignItems = "center";
+      unreadBadge.style.justifyContent = "center";
+      userInfo.appendChild(unreadBadge);
+    }
 
     userInfo.appendChild(icon);
     userInfo.appendChild(name);
@@ -56,15 +85,14 @@ function renderUserList(users) {
 
     // Add click listener to open chat box
     userInfo.addEventListener("click", () => {
-      openedChatId = user.UserId
-
+      openedChatId = user.UserId;
       openChatBox(user);
+      // Here you would typically mark messages as read
     });
 
     userList.appendChild(li);
   });
 }
-
 
 export async function BuildProfile(user) {
 
@@ -186,6 +214,8 @@ export async function openChatBox(user) {
     existingChat.remove()
   };
 
+  markAsRead(user);
+
   // Create chat container (your existing code) ...
   const chatBox = document.createElement("div");
   chatBox.className = "chat-box";
@@ -227,7 +257,10 @@ export async function openChatBox(user) {
   closeBtn.style.border = "none";
   closeBtn.style.cursor = "pointer";
   closeBtn.style.color = "white";
-  closeBtn.onclick = () => chatBox.remove();
+  closeBtn.onclick = () => {
+  chatBox.remove();
+  openedChatId = 0; // Reset the openedChatId when closing the chat
+};
 
   chatHeader.appendChild(title);
   chatHeader.appendChild(closeBtn);
@@ -417,4 +450,38 @@ export async function SendMsg(){
     BuildErrorPage(500, "Can't connect to server")
   }
    
+}
+
+export async function FetchNotifications(user) {
+  try {
+
+  } catch (error) {
+    
+  }
+}
+
+// Add this function to users.js
+export async function fetchUnreadNotifications() {
+  try {
+    const response = await fetch("/api/get_notifs", {
+      method: "POST",
+      credentials: "include"
+    });
+
+    if (response.ok) {
+      return await response.json();
+    }
+    return [];
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
+    return [];
+  }
+}
+
+async function markAsRead(user){
+  try {
+    
+  } catch (error) {
+    
+  }
 }

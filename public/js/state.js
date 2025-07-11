@@ -82,6 +82,8 @@ function connectWebSocketSharedWorker() {
         case "new_message":
           if (openedChatId == message.data){
             RebuildMsgContainer(userOpened)
+          } else {
+            FetchUsers()
           }
       }
     };

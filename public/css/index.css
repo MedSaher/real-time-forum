@@ -322,3 +322,14 @@
   font-family: inherit;
   background-color: white;
 }
+.unread-badge {
+  background-color: #4a90e2;
+  color: white;
+  border-radius: 50%;
+  font-size: 12px;
+  width: 25px;
+  height: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

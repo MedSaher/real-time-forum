@@ -68,6 +68,7 @@ func SetupRoutes(db *sql.DB) *http.ServeMux {
 
 	mux.HandleFunc("/api/send_message", msgsHandler.InsertMessage)
 	mux.HandleFunc("/api/get_history", msgsHandler.GetChatHistoryHandler)
+	mux.HandleFunc("/api/get_notifs", msgsHandler.NotifsHandler)
 
 	// Other module routes would be registered similarly
 	// mux.HandleFunc("/api/posts", postsHandler.PostsHandler)

@@ -13,7 +13,7 @@ type MessageRepositoryLayer interface {
 	GetLastMessage(user1ID, user2ID int) (*Message, error)
 	MarkMessagesAsRead(senderID, receiverID int) error
 	GetUnreadMessageCount(userID int) (int, error)
-	GetUnreadMessages(userID int) ([]*Message, error)
+	GetUnreadMessages(userID string) ([]*Message, error)
 	GetUserIdBySession(token string) (string, error)
 	GetUserById(id string) bool
 }
@@ -120,7 +120,7 @@ func (r *MessageRepository) GetUnreadMessageCount(userID int) (int, error) {
 }
 
 // GetUnreadMessages fetches all unread messages for a user
-func (r *MessageRepository) GetUnreadMessages(userID int) ([]*Message, error) {
+func (r *MessageRepository) GetUnreadMessages(userID string) ([]*Message, error) {
 	query := `
 	SELECT ID, content, sender_id, receiver_id, is_read, created_at 
 	FROM private_messages 
