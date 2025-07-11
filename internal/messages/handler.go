@@ -3,17 +3,19 @@ package messages
 import (
 	"encoding/json"
 	"net/http"
+	"real-time/internal/hub"
 	"strconv"
 )
 
 // Create a struct to represent the:
 type Handler struct {
-	Service *MessagesService
+	Service *Service
+	Hub     *hub.Hub
 }
 
 // Instantiate a new Messages handler:
-func NewHandler(messSer *MessagesService) *Handler {
-	return &Handler{Service: messSer}
+func NewHandler(messSer *Service, hub *hub.Hub) *Handler {
+	return &Handler{Service: messSer, Hub: hub}
 }
 
 func (h *Handler) InsertMessage(w http.ResponseWriter, r *http.Request) {
@@ -37,8 +39,17 @@ func (h *Handler) InsertMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if h.Service.MessageRepo.GetUserById(Msg.RecieverId) {
-
 		h.Service.MessageRepo.InsertMessage(&Msg)
+		if h.Hub.Clients[Msg.RecieverId] != nil {
+			msg := hub.Message{Type: "new_message", Data: Msg.SenderId}
+			data, err := json.Marshal(msg)
+			if err != nil {
+				http.Error(w, "Internal Server error", http.StatusInternalServerError)
+				return
+			}
+			h.Hub.Broadcast <- data
+
+		}
 	} else {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return

@@ -1,21 +1,25 @@
 // views.js
 import { BuildLoginPage } from "/public/js/login.js";
 import { BuildMainPage, CreatePostDOM, FetchPosts } from "/public/js/post.js";
-import { FetchUsers, BuildProfile } from "/public/js/users.js";
+import { FetchUsers, BuildProfile, openedChatId, openChatBox, userOpened } from "/public/js/users.js";
 import { InitCommentModal } from "/public/js/comment.js";
 
 let worker = null;
 let port = null;
+let userId
 
 export async function renderHome() {
   document.body.innerHTML = ""; // Clear old page content
 
   const user = await checkIfLoggedIn();
+  
 
   if (!user) {
     BuildLoginPage();
     return;
   }
+
+  userId = user.user_id
 
   BuildMainPage();            // Layout
   FetchPosts();               // Load forum posts
@@ -75,6 +79,12 @@ function connectWebSocketSharedWorker() {
           console.log("[WS] New post received");
           FetchPosts(); // refresh posts
           break;
+        case "new_message":
+          if (openedChatId == message.data){
+            console.log("matches");
+            
+            openChatBox(userOpened)
+          }
       }
     };
 

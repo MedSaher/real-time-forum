@@ -64,7 +64,7 @@ func SetupRoutes(db *sql.DB) *http.ServeMux {
 	// initialize messages layers
 	msgsRepo := messages.NewRepository(db)
 	msgsService := messages.NewService(msgsRepo)
-	msgsHandler := messages.NewHandler(msgsService)
+	msgsHandler := messages.NewHandler(msgsService, hubS)
 
 	mux.HandleFunc("/api/send_message", msgsHandler.InsertMessage)
 	mux.HandleFunc("/api/get_history", msgsHandler.GetChatHistoryHandler)

@@ -1,6 +1,8 @@
 let messageOffset = 0;
 let loadingOldMessages = false;
 let allMessagesLoaded = false;
+export let openedChatId
+export let userOpened
 
 export async function FetchUsers() {
   try {
@@ -53,6 +55,8 @@ function renderUserList(users) {
 
     // Add click listener to open chat box
     userInfo.addEventListener("click", () => {
+      openedChatId = user.UserId
+      
       openChatBox(user);
     });
 
@@ -172,8 +176,8 @@ function renderMessages(messages, chatMessagesContainer, user, { prepend = false
 
 
 
-async function openChatBox(user) {
-
+export async function openChatBox(user) {
+    userOpened = user
 
   // Remove any existing chat box
   const existingChat = document.querySelector(".chat-box");

@@ -7,19 +7,20 @@ import (
 )
 
 // Create the employee that will execute the message sevice interface:
-type MessagesService struct {
+type Service struct {
 	MessageRepo MessageRepositoryLayer
 }
 
 // Instantiate the message service:
-func NewService(messRep MessageRepositoryLayer) *MessagesService {
-	return &MessagesService{
+func NewService(messRep MessageRepositoryLayer) *Service {
+	return &Service{
 		MessageRepo: messRep,
 	}
 }
 
+
 // Get all the messages between the client and the chosen user:
-func (s *MessagesService) GetChatHistoryService(id int, sessionValue string, offset int, limit int) ([]*Message, error) {
+func (s *Service) GetChatHistoryService(id int, sessionValue string, offset int, limit int) ([]*Message, error) {
 	// Get client ID from session token
 	clientId, err := s.MessageRepo.GetUserIdBySession(sessionValue)
 	if err != nil {
@@ -30,7 +31,7 @@ func (s *MessagesService) GetChatHistoryService(id int, sessionValue string, off
 }
 
 // mark message as read service:
-func (s *MessagesService) MarkMessageAsRead(fromID, userId int) error {
+func (s *Service) MarkMessageAsRead(fromID, userId int) error {
 	err := s.MessageRepo.MarkMessagesAsRead(fromID, userId)
 	if err != nil {
 		return err
@@ -38,7 +39,7 @@ func (s *MessagesService) MarkMessageAsRead(fromID, userId int) error {
 	return nil
 }
 
-func (s *MessagesService) ParseLimitOffset(r *http.Request) (offset, limit int) {
+func (s *Service) ParseLimitOffset(r *http.Request) (offset, limit int) {
 	offsetStr := r.URL.Query().Get("offset")
 	limitStr := r.URL.Query().Get("limit")
 
