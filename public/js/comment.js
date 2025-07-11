@@ -24,6 +24,10 @@ export function InitCommentModal() {
   content.style.maxWidth = "600px";
   content.style.width = "90%";
   content.style.position = "relative";
+  content.style.maxHeight = "80vh";
+  content.style.overflow = "hidden";
+  content.style.display = "flex";
+  content.style.flexDirection = "column";
 
   // Close button
   const closeBtn = document.createElement("button");
@@ -52,6 +56,16 @@ export function InitCommentModal() {
   body.id = "modal-post-content";
   body.style.marginTop = "8px";
 
+  // Create comments container
+  const commentsContainer = document.createElement("div");
+  commentsContainer.id = "comments-container";
+  commentsContainer.style.flex = "1";
+  commentsContainer.style.overflowY = "auto";
+  commentsContainer.style.margin = "10px 0";
+  commentsContainer.style.padding = "5px";
+  commentsContainer.style.borderTop = "1px solid #eee";
+  commentsContainer.style.borderBottom = "1px solid #eee";
+
   const textarea = document.createElement("textarea");
   textarea.id = "comment-textarea";
   textarea.placeholder = "Write a comment...";
@@ -73,11 +87,12 @@ export function InitCommentModal() {
   sendBtn.style.borderRadius = "6px";
   sendBtn.style.cursor = "pointer";
 
-  // Build hierarchy
+  // Build hierarchy - IMPORTANT: Add commentsContainer before textarea
   content.appendChild(closeBtn);
   content.appendChild(title);
   content.appendChild(author);
   content.appendChild(body);
+  content.appendChild(commentsContainer); // Add this line
   content.appendChild(textarea);
   content.appendChild(sendBtn);
 
@@ -109,6 +124,8 @@ export function ShowCommentModal(post) {
     modal.style.display = "none";
   };
 
+  fetchAndDisplayComments(post.id);
+
   modal.style.display = "flex";
 }
 
@@ -129,4 +146,76 @@ async function postComment(postId, comment){
     } catch (error) {
         BuildErrorPage(500, "Can't connect to server")
     }
+}
+
+export async function fetchAndDisplayComments(postId) {
+  try {
+    const response = await fetch(`/api/fetch_comments?id=${postId}`, {
+      method: "GET",
+      credentials: "include"
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const comments = await response.json();
+    console.log(comments);
+    
+    displayComments(comments);
+  } catch (error) {
+    console.error("Error fetching comments:", error);
+    // Display error message to user
+    const commentsContainer = document.getElementById("comments-container");
+    if (commentsContainer) {
+      commentsContainer.innerHTML = "<p>Error loading comments. Please try again.</p>";
+    }
+  }
+}
+
+function displayComments(comments) {
+  const commentsContainer = document.getElementById("comments-container");
+  if (!commentsContainer) return;
+
+  // Clear existing comments
+  commentsContainer.innerHTML = "";
+
+  if (!comments || comments.length === 0) {
+    commentsContainer.innerHTML = `
+      <div class="no-comments">
+        <i class="fa-regular fa-comment-dots"></i>
+        <p>No comments yet. Be the first to comment!</p>
+      </div>
+    `;
+    return;
+  }
+
+  // Create and append each comment
+  comments.forEach(comment => {
+    const commentElement = document.createElement("div");
+    commentElement.className = "comment";
+    
+    // Format the date
+    const commentDate = new Date(comment.created_at);
+    const formattedDate = commentDate.toLocaleString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    commentElement.innerHTML = `
+      <div class="comment-header">
+        <div class="comment-author">
+          <i class="fa-solid fa-user"></i>
+          <strong>${comment.nick_name}</strong>
+        </div>
+        <span class="comment-time">${formattedDate}</span>
+      </div>
+      <div class="comment-body">${comment.comment}</div>
+      <div class="comment-divider"></div>
+    `;
+    commentsContainer.appendChild(commentElement);
+  });
 }

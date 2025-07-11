@@ -57,7 +57,6 @@ func (h *Handler) InsertMessage(w http.ResponseWriter, r *http.Request) {
 
 		}
 	} else {
-		fmt.Println(Msg.RecieverId)
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
@@ -111,11 +110,14 @@ func (h *Handler) GetChatHistoryHandler(w http.ResponseWriter, r *http.Request) 
 	if messages == nil {
 		messages = []*Message{}
 	}
+	for _, v := range messages {
+		fmt.Println(v.Content)
+	}
 	json.NewEncoder(w).Encode(messages)
 }
 
-func (h *Handler) NotifsHandler(w http.ResponseWriter, r *http.Request){
-if r.Method != http.MethodPost {
+func (h *Handler) NotifsHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}

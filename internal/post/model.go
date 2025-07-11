@@ -4,13 +4,13 @@ import "time"
 
 // Declare a model to represent the Post and ease data exchange between backend and frontend:
 type Post struct {
-	Title        string   `json:"title"`
-	Content      string   `json:"content"`
-	AuthorID     string   `json:"authorId"`
-	Timestamp    string   `json:"time"`
-	LikeCount    int      `json:"likeCount"`
-	DislikeCount int      `json:"dislikeCount"`
-	Categories   []string `json:"categories"`
+	Title        string `json:"title"`
+	Content      string `json:"content"`
+	AuthorID     string `json:"authorId"`
+	Timestamp    string `json:"time"`
+	LikeCount    int    `json:"likeCount"`
+	DislikeCount int    `json:"dislikeCount"`
+	Category     string `json:"category"`
 }
 type PostDTO struct {
 	ID              int       `json:"id"`

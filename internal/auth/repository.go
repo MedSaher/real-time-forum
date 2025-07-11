@@ -159,6 +159,5 @@ func (r *sqliteUserRepo) DeleteSession(session_token string) error {
 	if rowsAffected == 0 {
 		return fmt.Errorf("no session found with UUID: %s", session_token)
 	}
-	fmt.Println("deleted")
 	return nil
 }

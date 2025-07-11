@@ -6,6 +6,7 @@ export async function createPostFunc() {
     const title = document.getElementById("post-title").value.trim();
     const content = document.getElementById("post-content").value.trim();
     const category = document.getElementById("post-category").value.trim();
+    
 
     const response = await fetch("/api/add_post", {
       method: "POST",
@@ -15,7 +16,7 @@ export async function createPostFunc() {
       body: JSON.stringify({
         title: title,
         content: content,
-        categories: category,
+        category: category,
       })
     });
 
@@ -91,7 +92,7 @@ export async function FetchPosts() {
       // Categories
       const category = document.createElement("div");
       category.className = "post-category";
-      category.textContent = post.category_name || "Uncategorized";
+      category.textContent = post.categoryName || "Uncategorized";
 
       // Like span
       const reactions = document.createElement("div");

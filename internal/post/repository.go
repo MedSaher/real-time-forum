@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+
+	// "fmt"
 	"time"
 )
 
@@ -25,10 +27,11 @@ func NewPostRepository(db *sql.DB) PostRepository {
 
 func (r *sqlitePostRepo) CreatePost(post *Post) (*PostDTO, error) {
 	// Insert the new post into the Post table
-	query := `INSERT INTO Post (Title, Content, AuthorID)
-          VALUES (?, ?, ?)`
-	result, err := r.db.Exec(query, post.Title, post.Content, post.AuthorID)
+	query := `INSERT INTO Post (Title, Content, AuthorID, Category)
+          VALUES (?, ?, ?, ?)`
+	result, err := r.db.Exec(query, post.Title, post.Content, post.AuthorID, post.Category)
 	if err != nil {
+		fmt.Println(err)
 		return nil, err
 	}
 
@@ -74,26 +77,20 @@ func (r *sqlitePostRepo) GetAllPosts() ([]*PostDTO, error) {
 
 	query := `
 	SELECT 
-		Post.ID, 
-		Post.Title, 
-		Post.Content, 
-		Post.AuthorID, 
-		Post.Timestamp, 
-		Post.LikeCount, 
-		Post.DislikeCount, 
-		IFNULL(GROUP_CONCAT(DISTINCT Category.Name), '') AS Categories, 
-		users.nickname,
-		users.first_name, 
-		users.last_name 
-	FROM Post
-	INNER JOIN users ON users.id = Post.AuthorID
-	LEFT JOIN PostCategory ON Post.ID = PostCategory.PostID
-	LEFT JOIN Category ON PostCategory.CategoryID = Category.ID
-	GROUP BY 
-		Post.ID, Post.Title, Post.Content, Post.AuthorID, Post.Timestamp, 
-		Post.LikeCount, Post.DislikeCount, users.nickname, 
-		users.first_name, users.last_name
-	ORDER BY Post.ID DESC;`
+    Post.ID, 
+    Post.Title, 
+    Post.Content, 
+    Post.AuthorID, 
+    Post.Category,  -- Now getting category directly from Post table
+    Post.Timestamp, 
+    Post.LikeCount, 
+    Post.DislikeCount, 
+    users.nickname,
+    users.first_name, 
+    users.last_name 
+FROM Post
+INNER JOIN users ON users.id = Post.AuthorID
+ORDER BY Post.ID DESC;`
 
 	rows, err := r.db.Query(query)
 	if err != nil {
@@ -109,15 +106,14 @@ func (r *sqlitePostRepo) GetAllPosts() ([]*PostDTO, error) {
 			&post.Title,
 			&post.Content,
 			&post.AuthorID,
+			&post.CategoryName,
 			&post.Timestamp,
 			&post.LikeCount,
 			&post.DislikeCount,
-			&post.CategoryName,
 			&post.NickName,
 			&post.AuthorFirstName,
 			&post.AuthorLastName,
 		); err != nil {
-			fmt.Println(post.Timestamp)
 			return nil, fmt.Errorf("row scan error: %w", err)
 		}
 		posts = append(posts, post)
@@ -138,15 +134,15 @@ func (r *sqlitePostRepo) ShowComments(id int) ([]*Comment, error) {
 	query := `SELECT
 	 c.ID ,
 	 c.content,
-	 c.author_id,
-	 c.post_id,
-	 c.created_at,
-	 u.nick_name
-	 FROM comments AS c
+	 c.AuthorId,
+	 c.PostId,
+	 c.Timestamp,
+	 u.nickname
+	 FROM comment AS c
 	 JOIN users AS u
-	 ON c.author_id=u.ID
-	 WHERE post_id = ?
-	 ORDER BY c.created_at DESC
+	 ON c.AuthorId=u.id
+	 WHERE PostId = ?
+	 ORDER BY c.Timestamp DESC
 	`
 
 	rows, err := r.db.Query(query, id)

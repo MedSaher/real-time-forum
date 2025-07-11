@@ -19,11 +19,11 @@ export async function FetchUsers() {
       const users = await usersResponse.json();
       // Ensure notificationsResponse is an array before filtering
       const notifications = Array.isArray(notificationsResponse) ? notificationsResponse : [];
-      
+
       // Add unread counts to each user
       const usersWithUnreadCounts = users.map(user => ({
         ...user,
-        unreadCount: notifications.filter(n => 
+        unreadCount: notifications.filter(n =>
           n.SenderId === user.UserId && !n.is_read
         ).length
       }));
@@ -126,6 +126,7 @@ export async function BuildProfile(user) {
       },
     })
     if (response.ok) {
+      alert("went well")
       window.location.href = "/"
 
     } else {
@@ -154,12 +155,18 @@ async function fetchChatHistory(userId, offset = 0, limit = 10) {
 }
 
 function renderMessages(messages, chatMessagesContainer, user, { prepend = false } = {}) {
-  // Sort by message ID ascending
+  // Clear existing messages if we're not prepending (initial load or rebuild)
+  if (!prepend) {
+    chatMessagesContainer.innerHTML = "";
+  }
+
+  // Always sort by ID ascending for consistent order
   messages.sort((a, b) => a.id - b.id);
 
-  if (loadingOldMessages) {
+  if (prepend){
     messages.sort((a, b) => b.id - a.id);
   }
+  
 
   messages.forEach(msg => {
     const isSentByGuestUser = msg.SenderId === user.UserId;
@@ -169,13 +176,14 @@ function renderMessages(messages, chatMessagesContainer, user, { prepend = false
     wrapper.className = "msg-wrapper";
     wrapper.style.display = "flex";
     wrapper.style.flexDirection = "column";
-    wrapper.style.alignItems = isSentByGuestUser ? "flex-end" : "flex-start";
+    wrapper.style.alignItems = isSentByGuestUser ? "flex-start" : "flex-end";
     wrapper.style.margin = "6px 0";
+    wrapper.dataset.messageId = msg.id;
 
     // Create message bubble
     const msgBubble = document.createElement("div");
     msgBubble.className = "msg-bubble";
-    msgBubble.style.backgroundColor = isSentByGuestUser ? "#dcf8c6" : "#ffffff";
+    msgBubble.style.backgroundColor = isSentByGuestUser ? "#ffffff" : "#dcf8c6";
     msgBubble.style.color = "#333";
     msgBubble.style.padding = "10px 14px";
     msgBubble.style.borderRadius = "12px";
@@ -221,7 +229,10 @@ function renderMessages(messages, chatMessagesContainer, user, { prepend = false
 
 
 export async function openChatBox(user) {
-  userOpened = user
+  userOpened = user;
+  messageOffset = 0; // Reset offset
+  allMessagesLoaded = false; // Reset loaded flag
+  loadingOldMessages = false; // Reset loading flag
 
   // Remove any existing chat box
   const existingChat = document.querySelector(".chat-box");
@@ -275,9 +286,9 @@ export async function openChatBox(user) {
   closeBtn.style.cursor = "pointer";
   closeBtn.style.color = "white";
   closeBtn.onclick = () => {
-  chatBox.remove();
-  openedChatId = 0; // Reset the openedChatId when closing the chat
-};
+    chatBox.remove();
+    openedChatId = 0; // Reset the openedChatId when closing the chat
+  };
 
   chatHeader.appendChild(title);
   chatHeader.appendChild(closeBtn);
@@ -396,13 +407,20 @@ function throttle(fn, limit) {
 export async function RebuildMsgContainer(user) {
   const chatMessages = document.querySelector(".chat-messages"); // Added dot before class name
 
+  userOpened = user;
+  messageOffset = 0; // Reset offset
+  allMessagesLoaded = false; // Reset loaded flag
+  loadingOldMessages = false; // Reset loading flag
+
   if (!chatMessages) return; // Add a check to prevent errors if element doesn't exist
+
+    markAsRead(user);
 
   // Initial load
   messageOffset = 0;
   const messages = await fetchChatHistory(user.UserId, messageOffset, 10);
   messageOffset += messages.length;
-  console.log(messages);
+  
 
   renderMessages(messages, chatMessages, user);
 
@@ -413,38 +431,51 @@ export async function RebuildMsgContainer(user) {
   });
 
   const throttledScrollHandler = throttle(async function () {
-    if (chatMessages.scrollTop === 0 && !loadingOldMessages && !allMessagesLoaded) {
-      loadingOldMessages = true;
+  if (chatMessages.scrollTop === 0 && !loadingOldMessages && !allMessagesLoaded) {
+    loadingOldMessages = true;
 
-      const previousHeight = chatMessages.scrollHeight;
+    const previousHeight = chatMessages.scrollHeight;
 
-      const moreMessages = await fetchChatHistory(user.UserId, messageOffset, 10);
+    const moreMessages = await fetchChatHistory(user.UserId, messageOffset, 10);
 
-      if (moreMessages.length === 0) {
-        allMessagesLoaded = true;
-        return;
-      }
-
-      messageOffset += moreMessages.length;
-      renderMessages(moreMessages, chatMessages, user, { prepend: true });
-
-      // Maintain scroll position
-      requestAnimationFrame(() => {
-        chatMessages.scrollTop = chatMessages.scrollHeight - previousHeight;
-      });
-
+    if (moreMessages.length === 0) {
+      allMessagesLoaded = true;
       loadingOldMessages = false;
+      return;
     }
-  }, 400);
 
+    // Check if we already have these messages
+    const existingIds = Array.from(chatMessages.querySelectorAll('.msg-wrapper'))
+      .map(el => el.dataset.messageId);
+    const newMessages = moreMessages.filter(msg => 
+      !existingIds.includes(String(msg.id))
+    );
+
+    if (newMessages.length === 0) {
+      allMessagesLoaded = true;
+      loadingOldMessages = false;
+      return;
+    }
+
+    messageOffset += newMessages.length;
+    renderMessages(newMessages, chatMessages, user, { prepend: true });
+
+    // Maintain scroll position
+    requestAnimationFrame(() => {
+      chatMessages.scrollTop = chatMessages.scrollHeight - previousHeight;
+    });
+
+    loadingOldMessages = false;
+  }
+}, 400);
   chatMessages.addEventListener("scroll", throttledScrollHandler);
 }
 
-export async function SendMsg(){
+export async function SendMsg() {
   try {
     const msgContent = document.getElementById("chatInput").value.trim()
     console.log("user : ", userOpened.UserId);
-    
+
     const response = await fetch("/api/send_message", {
       method: "POST",
       headers: {
@@ -456,24 +487,24 @@ export async function SendMsg(){
         receiver_id: String(userOpened.UserId)
       }),
     })
-    if (!response.ok){
+    if (!response.ok) {
       BuildErrorPage(500, "Can't connect to server")
     }
     document.getElementById("chatInput").value = "";
     RebuildMsgContainer(userOpened)
-    
+
   } catch (error) {
     console.log("error", error);
     BuildErrorPage(500, "Can't connect to server")
   }
-   
+
 }
 
 export async function FetchNotifications(user) {
   try {
 
   } catch (error) {
-    
+
   }
 }
 

@@ -56,6 +56,7 @@ func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 	var post Post
 	post.AuthorID = userId
 	json.NewDecoder(r.Body).Decode(&post)
+	fmt.Println(post.Category)
 	postDTO, err := h.Service.AddPost(&post)
 	if err != nil {
 		error := erro.ErrBroadCast(http.StatusInternalServerError, "Internal Server Error")
@@ -85,7 +86,6 @@ func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) FetchPosts(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		fmt.Println("here 1")
 		erro.ErrBroadCast(http.StatusMethodNotAllowed, "Method not allowed")
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]interface{}{
@@ -102,7 +102,6 @@ func (h *Handler) FetchPosts(w http.ResponseWriter, r *http.Request) {
 	}
 	_, err = h.Service.repo.GetUserIdBySession(session_token.Value)
 	if err != nil {
-		fmt.Println("here 3")
 		http.Error(w, "Unauthorized Access", http.StatusUnauthorized)
 		return
 	}
@@ -152,11 +151,15 @@ func (h *Handler) FetchCommentsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
-
+	
 	comments, err := h.Service.repo.ShowComments(id)
 	if err != nil {
+		fmt.Println(err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 	json.NewEncoder(w).Encode(comments)
+	for _, v := range comments {
+		fmt.Println(v)
+	}
 }
