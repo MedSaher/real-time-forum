@@ -1,3 +1,4 @@
+import { BuildErrorPage } from "/public/js/post.js";
 let messageOffset = 0;
 let loadingOldMessages = false;
 let allMessagesLoaded = false;
@@ -56,7 +57,7 @@ function renderUserList(users) {
     // Add click listener to open chat box
     userInfo.addEventListener("click", () => {
       openedChatId = user.UserId
-      
+
       openChatBox(user);
     });
 
@@ -111,10 +112,9 @@ async function fetchChatHistory(userId, offset = 0, limit = 10) {
 function renderMessages(messages, chatMessagesContainer, user, { prepend = false } = {}) {
   // Sort by message ID ascending
   messages.sort((a, b) => a.id - b.id);
-  
+
   if (loadingOldMessages) {
     messages.sort((a, b) => b.id - a.id);
-    
   }
 
   messages.forEach(msg => {
@@ -177,7 +177,7 @@ function renderMessages(messages, chatMessagesContainer, user, { prepend = false
 
 
 export async function openChatBox(user) {
-    userOpened = user
+  userOpened = user
 
   // Remove any existing chat box
   const existingChat = document.querySelector(".chat-box");
@@ -254,26 +254,26 @@ export async function openChatBox(user) {
   const throttledScrollHandler = throttle(async function () {
     if (chatMessages.scrollTop === 0 && !loadingOldMessages && !allMessagesLoaded) {
       loadingOldMessages = true;
-  
+
       const previousHeight = chatMessages.scrollHeight;
-  
+
       const moreMessages = await fetchChatHistory(user.UserId, messageOffset, 10);
-  
-        
-  
+
+
+
       if (moreMessages.length === 0) {
         allMessagesLoaded = true;
         return;
       }
-  
+
       messageOffset += moreMessages.length;
       renderMessages(moreMessages, chatMessages, user, { prepend: true });
-  
+
       // Maintain scroll position
       requestAnimationFrame(() => {
         chatMessages.scrollTop = chatMessages.scrollHeight - previousHeight;
       });
-  
+
       loadingOldMessages = false;
     }
   }, 400);
@@ -290,6 +290,7 @@ export async function openChatBox(user) {
   chatInput.style.background = "#fff";
 
   const chatInputField = document.createElement("input");
+  chatInputField.id = "chatInput"
   chatInputField.type = "text";
   chatInputField.placeholder = "Type a message...";
   chatInputField.style.flex = "1";
@@ -307,6 +308,8 @@ export async function openChatBox(user) {
   chatSendBtn.style.borderRadius = "6px";
   chatSendBtn.style.cursor = "pointer";
   chatSendBtn.style.fontSize = "14px";
+
+  chatSendBtn.addEventListener("click", SendMsg)
 
   // You can add your sending message handler here if needed
 
@@ -338,4 +341,80 @@ function throttle(fn, limit) {
       }
     }, limit);
   };
+}
+
+export async function RebuildMsgContainer(user) {
+  const chatMessages = document.querySelector(".chat-messages"); // Added dot before class name
+
+  if (!chatMessages) return; // Add a check to prevent errors if element doesn't exist
+
+  // Initial load
+  messageOffset = 0;
+  const messages = await fetchChatHistory(user.UserId, messageOffset, 10);
+  messageOffset += messages.length;
+  console.log(messages);
+
+  renderMessages(messages, chatMessages, user);
+
+  // Rest of the function remains the same...
+  // Scroll to bottom initially
+  requestAnimationFrame(() => {
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  });
+
+  const throttledScrollHandler = throttle(async function () {
+    if (chatMessages.scrollTop === 0 && !loadingOldMessages && !allMessagesLoaded) {
+      loadingOldMessages = true;
+
+      const previousHeight = chatMessages.scrollHeight;
+
+      const moreMessages = await fetchChatHistory(user.UserId, messageOffset, 10);
+
+      if (moreMessages.length === 0) {
+        allMessagesLoaded = true;
+        return;
+      }
+
+      messageOffset += moreMessages.length;
+      renderMessages(moreMessages, chatMessages, user, { prepend: true });
+
+      // Maintain scroll position
+      requestAnimationFrame(() => {
+        chatMessages.scrollTop = chatMessages.scrollHeight - previousHeight;
+      });
+
+      loadingOldMessages = false;
+    }
+  }, 400);
+
+  chatMessages.addEventListener("scroll", throttledScrollHandler);
+}
+
+export async function SendMsg(){
+  try {
+    const msgContent = document.getElementById("chatInput").value.trim()
+    console.log("user : ", userOpened.UserId);
+    
+    const response = await fetch("/api/send_message", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "credentials": "include",
+      },
+      body: JSON.stringify({
+        content: msgContent,
+        receiver_id: String(userOpened.UserId)
+      }),
+    })
+    if (!response.ok){
+      BuildErrorPage(500, "Can't connect to server")
+    }
+    document.getElementById("chatInput").value = "";
+    RebuildMsgContainer(userOpened)
+    
+  } catch (error) {
+    console.log("error", error);
+    BuildErrorPage(500, "Can't connect to server")
+  }
+   
 }

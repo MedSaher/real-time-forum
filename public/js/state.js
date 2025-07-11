@@ -1,12 +1,12 @@
 // views.js
 import { BuildLoginPage } from "/public/js/login.js";
 import { BuildMainPage, CreatePostDOM, FetchPosts } from "/public/js/post.js";
-import { FetchUsers, BuildProfile, openedChatId, openChatBox, userOpened } from "/public/js/users.js";
+import { FetchUsers, BuildProfile, openedChatId, RebuildMsgContainer, userOpened } from "/public/js/users.js";
 import { InitCommentModal } from "/public/js/comment.js";
 
 let worker = null;
 let port = null;
-let userId
+// let userId
 
 export async function renderHome() {
   document.body.innerHTML = ""; // Clear old page content
@@ -19,7 +19,7 @@ export async function renderHome() {
     return;
   }
 
-  userId = user.user_id
+  // userId = user.user_id
 
   BuildMainPage();            // Layout
   FetchPosts();               // Load forum posts
@@ -81,9 +81,8 @@ function connectWebSocketSharedWorker() {
           break;
         case "new_message":
           if (openedChatId == message.data){
-            console.log("matches");
             
-            openChatBox(userOpened)
+            RebuildMsgContainer(userOpened)
           }
       }
     };

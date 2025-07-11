@@ -2,6 +2,7 @@ package messages
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"real-time/internal/hub"
 	"strconv"
@@ -51,6 +52,7 @@ func (h *Handler) InsertMessage(w http.ResponseWriter, r *http.Request) {
 
 		}
 	} else {
+		fmt.Println(Msg.RecieverId)
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
