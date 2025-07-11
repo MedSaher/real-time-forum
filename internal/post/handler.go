@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	"real-time/internal/hub"
 	"real-time/internal/view"
@@ -130,11 +131,32 @@ func (h *Handler) CommentHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Unauthorized Access", http.StatusUnauthorized)
 		return
 	}
-	comment.AuthorId = userId
-	fmt.Println(comment.PostID)
-	err = h.Service.repo.CreateComment(comment.PostID, comment.AuthorId, comment.PostContent)
+	comment.AuthorID = userId
+	err = h.Service.repo.CreateComment(comment.PostId, comment.AuthorID, comment.Content)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
+}
+
+func (h *Handler) FetchCommentsHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	queryParam := r.URL.Query()
+	query := queryParam.Get("id")
+
+	id, err := strconv.Atoi(query)
+	if err != nil {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
+	comments, err := h.Service.repo.ShowComments(id)
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	json.NewEncoder(w).Encode(comments)
 }

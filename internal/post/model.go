@@ -26,8 +26,12 @@ type PostDTO struct {
 	AuthorLastName  string    `json:"authorLastName"`
 }
 
+// Create the comment model:
 type Comment struct {
-	PostID      string `json:"post_id"`
-	PostContent string `json:"comment"`
-	AuthorId    string
+	Id        int    `json:"id"`
+	Content   string `json:"comment"`
+	AuthorID  string `json:"author_id"`
+	NickName  string `json:"nick_name"`
+	PostId    string `json:"post_id"`
+	CreatedAt string `json:"created_at"`
 }

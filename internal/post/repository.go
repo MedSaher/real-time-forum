@@ -12,6 +12,7 @@ type PostRepository interface {
 	GetUserIdBySession(token string) (string, error)
 	GetAllPosts() ([]*PostDTO, error)
 	CreateComment(postId string, authorId string, comment string) error
+	ShowComments(id int) ([]*Comment, error)
 }
 
 type sqlitePostRepo struct {
@@ -131,4 +132,33 @@ func (r *sqlitePostRepo) CreateComment(postId string, authorId string, content s
 		return err
 	}
 	return nil
+}
+
+func (r *sqlitePostRepo) ShowComments(id int) ([]*Comment, error) {
+	query := `SELECT
+	 c.ID ,
+	 c.content,
+	 c.author_id,
+	 c.post_id,
+	 c.created_at,
+	 u.nick_name
+	 FROM comments AS c
+	 JOIN users AS u
+	 ON c.author_id=u.ID
+	 WHERE post_id = ?
+	 ORDER BY c.created_at DESC
+	`
+
+	rows, err := r.db.Query(query, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var comments []*Comment
+	for rows.Next() {
+		comment := &Comment{}
+		rows.Scan(&comment.Id, &comment.Content, &comment.AuthorID, &comment.PostId, &comment.CreatedAt, &comment.NickName)
+		comments = append(comments, comment)
+	}
+	return comments, nil
 }

@@ -112,7 +112,7 @@ export function ShowCommentModal(post) {
   modal.style.display = "flex";
 }
 
-function postComment(postId, comment){
+async function postComment(postId, comment){
     try {
         
         const response = fetch("/api/add_comment", {
@@ -126,7 +126,6 @@ function postComment(postId, comment){
                 comment: comment,
             })
         })
-        
     } catch (error) {
         BuildErrorPage(500, "Can't connect to server")
     }
