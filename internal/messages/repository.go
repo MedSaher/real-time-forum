@@ -11,7 +11,7 @@ type MessageRepositoryLayer interface {
 	InsertMessage(m *Message) error
 	GetChatHistory(client string, guest int, offset int, limit int) ([]*Message, error)
 	GetLastMessage(user1ID, user2ID int) (*Message, error)
-	MarkMessagesAsRead(senderID, receiverID int) error
+	MarkMessagesAsRead(senderID, receiverID string) error
 	GetUnreadMessageCount(userID int) (int, error)
 	GetUnreadMessages(userID string) ([]*Message, error)
 	GetUserIdBySession(token string) (string, error)
@@ -91,7 +91,7 @@ func (r *MessageRepository) GetLastMessage(client, guest int) (*Message, error) 
 }
 
 // MarkMessagesAsRead marks unread messages as read between two users
-func (r *MessageRepository) MarkMessagesAsRead(senderID, receiverID int) error {
+func (r *MessageRepository) MarkMessagesAsRead(senderID, receiverID string) error {
 	query := `
 	UPDATE private_messages 
 	SET is_read = 1 

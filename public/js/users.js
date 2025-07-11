@@ -12,15 +12,18 @@ export async function FetchUsers() {
         method: "POST",
         credentials: "include",
       }),
-      fetchUnreadNotifications()
+      fetchUnreadNotifications().catch(() => []) // Return empty array if fails
     ]);
 
     if (usersResponse.ok) {
       const users = await usersResponse.json();
+      // Ensure notificationsResponse is an array before filtering
+      const notifications = Array.isArray(notificationsResponse) ? notificationsResponse : [];
+      
       // Add unread counts to each user
       const usersWithUnreadCounts = users.map(user => ({
         ...user,
-        unreadCount: notificationsResponse.filter(n => 
+        unreadCount: notifications.filter(n => 
           n.SenderId === user.UserId && !n.is_read
         ).length
       }));
@@ -30,6 +33,19 @@ export async function FetchUsers() {
     }
   } catch (error) {
     console.log("Network error or server failure.", error);
+    // Render users without notification counts if there's an error
+    const usersResponse = await fetch("/api/users", {
+      method: "POST",
+      credentials: "include",
+    });
+    if (usersResponse.ok) {
+      const users = await usersResponse.json();
+      const usersWithUnreadCounts = users.map(user => ({
+        ...user,
+        unreadCount: 0 // Default to 0 if we can't get notifications
+      }));
+      renderUserList(usersWithUnreadCounts);
+    }
   }
 }
 
@@ -215,6 +231,7 @@ export async function openChatBox(user) {
   };
 
   markAsRead(user);
+  FetchUsers();
 
   // Create chat container (your existing code) ...
   const chatBox = document.createElement("div");
@@ -460,7 +477,6 @@ export async function FetchNotifications(user) {
   }
 }
 
-// Add this function to users.js
 export async function fetchUnreadNotifications() {
   try {
     const response = await fetch("/api/get_notifs", {
@@ -469,19 +485,28 @@ export async function fetchUnreadNotifications() {
     });
 
     if (response.ok) {
-      return await response.json();
+      const data = await response.json();
+      return Array.isArray(data) ? data : []; // Ensure we always return an array
     }
     return [];
   } catch (error) {
     console.error("Error fetching notifications:", error);
-    return [];
+    return []; // Return empty array on error
   }
 }
 
-async function markAsRead(user){
+async function markAsRead(user) {
   try {
-    
+    const response = await fetch(`/api/mark_read?from_id=${user.UserId}`, {
+      method: "GET",
+      credentials: "include"
+    });
+
+    if (!response.ok) {
+      BuildErrorPage(500, "Internal Server Error")
+    }
   } catch (error) {
-    
+    BuildErrorPage(500, "Internal Server Error")
+    console.error("Error marking messages as read:", error);
   }
 }

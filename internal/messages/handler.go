@@ -141,32 +141,32 @@ if r.Method != http.MethodPost {
 }
 
 // Mark a message as read:
-// func (h *Handler) MarkMessageAsRead(w http.ResponseWriter, r *http.Request) {
-// 	fromIDStr := r.URL.Query().Get("from_id")
-// 	fromID, err := strconv.Atoi(fromIDStr)
-// 	if err != nil || fromID <= 0 {
-// 		http.Error(w, "Invalid sender ID", http.StatusBadRequest)
-// 		return
-// 	}
+func (h *Handler) MarkMessageAsRead(w http.ResponseWriter, r *http.Request) {
+	fromIDStr := r.URL.Query().Get("from_id")
+	fromID, err := strconv.Atoi(fromIDStr)
+	if err != nil || fromID <= 0 {
+		http.Error(w, "Invalid sender ID", http.StatusBadRequest)
+		return
+	}
 
-// 	cookie, err := r.Cookie("session_token")
-// 	if err != nil {
-// 		utils.ResponseJSON(w, http.StatusUnauthorized, map[string]any{"message": "No session token found"})
-// 		return
-// 	}
+	cookie, err := r.Cookie("session_token")
+	if err != nil {
+		http.Error(w, "Unauthorized access", http.StatusUnauthorized)
+		return
+	}
 
-// 	userID, err := h.Service.MessageRepo.GetUserIdBySession(cookie.Value)
-// 	if err != nil {
-// 		utils.ResponseJSON(w, http.StatusUnauthorized, map[string]any{"message": "Invalid session"})
-// 		return
-// 	}
+	userID, err := h.Service.MessageRepo.GetUserIdBySession(cookie.Value)
+	if err != nil {
+		http.Error(w, "Unauthorized access", http.StatusUnauthorized)
+		return
+	}
 
-// 	err = h.MessageSer.MarkMessageAsRead(fromID, userID)
-// 	if err != nil {
-// 		http.Error(w, "Failed to mark as read", http.StatusInternalServerError)
-// 		return
-// 	}
-// 	json.NewEncoder(w).Encode(map[string]any{
-// 		"success": true,
-// 	})
-// }
+	err = h.Service.MarkMessageAsRead(fromIDStr, userID)
+	if err != nil {
+		http.Error(w, "Failed to mark as read", http.StatusInternalServerError)
+		return
+	}
+	json.NewEncoder(w).Encode(map[string]any{
+		"success": true,
+	})
+}

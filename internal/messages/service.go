@@ -31,7 +31,7 @@ func (s *Service) GetChatHistoryService(id int, sessionValue string, offset int,
 }
 
 // mark message as read service:
-func (s *Service) MarkMessageAsRead(fromID, userId int) error {
+func (s *Service) MarkMessageAsRead(fromID, userId string) error {
 	err := s.MessageRepo.MarkMessagesAsRead(fromID, userId)
 	if err != nil {
 		return err
