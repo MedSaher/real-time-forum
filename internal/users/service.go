@@ -1,7 +1,6 @@
 package users
 
 import (
-	"fmt"
 	"real-time/internal/hub"
 )
 
