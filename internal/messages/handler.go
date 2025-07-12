@@ -110,9 +110,6 @@ func (h *Handler) GetChatHistoryHandler(w http.ResponseWriter, r *http.Request) 
 	if messages == nil {
 		messages = []*Message{}
 	}
-	for _, v := range messages {
-		fmt.Println(v.Content)
-	}
 	json.NewEncoder(w).Encode(messages)
 }
 
