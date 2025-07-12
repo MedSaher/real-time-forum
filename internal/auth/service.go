@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"math/rand/v2"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -23,11 +24,13 @@ func NewService(repo UserRepository) *Service {
 
 // Register a new user after validating inputs and hashing password.
 func (s *Service) Register(input RegisterInput) (string, error) {
+	emailRegex := `^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`
+	re := regexp.MustCompile(emailRegex)
 	// Basic validation (can be expanded)
 	if input.Nickname == "" || input.Email == "" || input.Password == "" {
 		return "", errors.New("nickname, email and password are required")
 	}
-	if strings.Contains(input.Nickname, " ") || strings.Contains(input.Email, " ") || !strings.Contains(input.Email, "@") {
+	if strings.Contains(input.Nickname, " ") || strings.Contains(input.Email, " ") || !re.MatchString(input.Email) {
 		return "", errors.New("invalid nickname or email")
 	}
 	// Check if user already exists
@@ -37,6 +40,13 @@ func (s *Service) Register(input RegisterInput) (string, error) {
 	if _, err := s.repo.FindByNickname(input.Nickname); err == nil {
 		return "", errors.New("nickname already taken")
 	}
+	if len(input.Nickname) < 6 || len(input.Email) < 6 || len(input.FirstName) < 3 || len(input.LastName) < 3 {
+		return "", errors.New("invalid inputs length")
+	}
+	num, err := strconv.Atoi(input.Age)
+    if err != nil || num < 18 {
+        return "", errors.New("invalid Age")
+    }
 
 	// Hash password
 	hashed, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
@@ -99,8 +109,6 @@ func (s *Service) Login(input *LoginInput) (string, error) {
 
 	return token, nil
 }
-
-
 
 func (s *Service) GenerateToken(userId string) (string, error) {
 	intUserId, err := strconv.Atoi(userId)

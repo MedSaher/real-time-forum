@@ -2,7 +2,6 @@ package messages
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"real-time/internal/hub"
 	"strconv"

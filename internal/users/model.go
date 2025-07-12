@@ -4,4 +4,5 @@ type User struct {
 	UserId   string
 	Nickname string
 	Status   bool
+	UnreadCount int
 }

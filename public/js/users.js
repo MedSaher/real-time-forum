@@ -17,6 +17,8 @@ export async function FetchUsers() {
 
     if (usersResponse.ok) {
       const users = await usersResponse.json();
+      console.log("fucking new users : ", users);
+      
       // Ensure notificationsResponse is an array before filtering
       const notifications = Array.isArray(notificationsResponse) ? notificationsResponse : [];
 

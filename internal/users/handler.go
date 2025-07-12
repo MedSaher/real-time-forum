@@ -2,6 +2,7 @@ package users
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"real-time/internal/hub"
 	"real-time/internal/view"
@@ -39,8 +40,10 @@ func (h *Handler) UsersHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = h.Service.repo.GetUserIdBySession(session_token.Value)
+	userId, err := h.Service.repo.GetUserIdBySession(session_token.Value)
 	if err != nil {
+		fmt.Println("1 ", err)
+
 		error := erro.ErrBroadCast(http.StatusUnauthorized, "Unauthorized Access")
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(map[string]interface{}{
@@ -50,8 +53,9 @@ func (h *Handler) UsersHandler(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	users, err := h.Service.GetAllUsers(h.Hub)
+	users, err := h.Service.GetAllUsers(h.Hub, userId)
 	if err != nil {
+		fmt.Println("2 ", err)
 		error := erro.ErrBroadCast(http.StatusInternalServerError, "Internal Server Error")
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]interface{}{

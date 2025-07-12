@@ -1,8 +1,8 @@
 package users
 
 import (
+	"fmt"
 	"real-time/internal/hub"
-	"sort"
 )
 
 type Service struct {
@@ -13,8 +13,8 @@ func NewService(repo UsersRepository) *Service {
 	return &Service{repo: repo}
 }
 
-func (s *Service) GetAllUsers(hub *hub.Hub) ([]*User, error) {
-	users, err := s.repo.GetAllUsers()
+func (s *Service) GetAllUsers(hub *hub.Hub, userId string) ([]*User, error) {
+	users, err := s.repo.GetAllUsers(userId)
 	if err != nil {
 		return nil, err
 	}
@@ -27,9 +27,5 @@ func (s *Service) GetAllUsers(hub *hub.Hub) ([]*User, error) {
 			}
 		}
 	}
-	// sort by online
-	sort.Slice(users, func(i, j int) bool {
-		return users[i].Status && !users[j].Status
-	})
 	return users, nil
 }
