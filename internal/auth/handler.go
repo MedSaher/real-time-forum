@@ -165,7 +165,7 @@ func (h *Handler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	session_token, err := r.Cookie("session_token")
 	if err != nil {
-		error := erro.ErrBroadCast(http.StatusUnauthorized, "Unautherized Access")
+		error := erro.ErrBroadCast(http.StatusUnauthorized, "Unauthorized Access")
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"status_code": error.StatusCode,
@@ -175,9 +175,9 @@ func (h *Handler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.service.repo.DeleteSession(session_token.Value)
+	userId, err := h.service.repo.GetUserIdBySession(session_token.Value)
 	if err != nil {
-		error := erro.ErrBroadCast(http.StatusUnauthorized, "Unautherized Access")
+		error := erro.ErrBroadCast(http.StatusUnauthorized, "Unauthorized Access")
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"status_code": error.StatusCode,
@@ -186,6 +186,54 @@ func (h *Handler) LogOutHandler(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
+
+	// Delete the session
+	err = h.service.repo.DeleteSession(session_token.Value)
+	if err != nil {
+		error := erro.ErrBroadCast(http.StatusInternalServerError, "Internal Server Error")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"status_code": error.StatusCode,
+			"error":       error.ErrMessage,
+			"state":       "false",
+		})
+		return
+	}
+
+	// Broadcast logout to all clients (including other tabs of the same user)
+	if h.Hub != nil {
+		// Close all WebSocket connections for this user
+		h.Hub.Mutex.Lock()
+		if client, ok := h.Hub.Clients[userId]; ok {
+			close(client.Send)
+			delete(h.Hub.Clients, userId)
+		}
+		h.Hub.Mutex.Unlock()
+
+		// Broadcast user offline status
+		msg := hub.Message{
+			Type: "online_users",
+			Data: map[string]string{"user_id": userId},
+		}
+		msgBytes, err := json.Marshal(msg)
+		if err == nil {
+			h.Hub.Broadcast <- msgBytes
+		}
+	}
+
+	// Clear the cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:     "session_token",
+		Value:    "",
+		HttpOnly: true,
+		Secure:   false,
+		Path:     "/",
+		MaxAge:   -1, // Immediately expire the cookie
+	})
+
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"state": "true",
+	})
 }
 
 func (h *Handler) FormHandler(w http.ResponseWriter, r *http.Request) {

@@ -17,7 +17,6 @@ export async function FetchUsers() {
 
     if (usersResponse.ok) {
       const users = await usersResponse.json();
-      console.log("fucking new users : ", users);
       
       // Ensure notificationsResponse is an array before filtering
       const notifications = Array.isArray(notificationsResponse) ? notificationsResponse : [];
@@ -103,7 +102,7 @@ function renderUserList(users) {
     li.appendChild(statusDot);
 
     // Add click listener to open chat box
-    userInfo.addEventListener("click", () => {
+    li.addEventListener("click", () => {
       openedChatId = user.UserId;
       openChatBox(user);
       // Here you would typically mark messages as read
@@ -226,6 +225,7 @@ function renderMessages(messages, chatMessagesContainer, user, { prepend = false
       chatMessagesContainer.appendChild(wrapper);
     }
   });
+  FetchUsers();
 }
 
 

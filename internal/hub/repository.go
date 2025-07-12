@@ -23,7 +23,7 @@ func (r *sqliteRepo) GetUserIdBySession(session_token string) (string, error) {
 	var userId string
 	err := r.db.QueryRow(query, session_token).Scan(&userId)
 	if err != nil {
-		return "", errors.New("error retrieving data")
+		return "", errors.New("error retrieving data 3")
 	}
 
 	return userId, nil
