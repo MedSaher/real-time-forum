@@ -87,6 +87,8 @@ onconnect = (e) => {
       case "stop_typing":
       case "typing":
         if (ws && ws.readyState === WebSocket.OPEN) {
+          console.log(type);
+          
           ws.send(JSON.stringify({ type, ...payload }));
         } else {
           console.warn("[Worker] Cannot send message, WebSocket not open");

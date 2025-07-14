@@ -1,9 +1,12 @@
 import { BuildErrorPage } from "/public/js/post.js";
+import { sendMessage } from "/public/js/state.js";
 let messageOffset = 0;
 let loadingOldMessages = false;
 let allMessagesLoaded = false;
 export let openedChatId
 export let userOpened
+let isTyping = false
+let time_out
 
 export async function FetchUsers() {
   try {
@@ -228,6 +231,36 @@ function renderMessages(messages, chatMessagesContainer, user, { prepend = false
   FetchUsers();
 }
 
+function handle_typing() {
+  let input_field = document.getElementById("chat-input");
+  input_field.addEventListener("input", () => {
+    if (!userOpened) {
+      return;
+    }
+
+    if (!isTyping) {
+      sendMessage({
+        type: "start_typing",
+        receiver: userOpened, 
+        content: "typing_status",
+      });
+      isTyping = true;
+    }
+
+    clearTimeout(time_out);
+
+    time_out = setTimeout(() => {
+      if (isTyping) {
+        sendMessage({
+          type: "stop_typing",
+          receiver: userOpened, 
+          content: "typing_status",
+        });
+        isTyping = false;
+      }
+    }, 1500);
+  });
+}
 
 
 export async function openChatBox(user) {
@@ -346,6 +379,7 @@ export async function openChatBox(user) {
 
 
   const chatInput = document.createElement("div");
+  chatInput.id = "chat-input"
   chatInput.className = "chat-input";
   chatInput.style.display = "flex";
   chatInput.style.padding = "10px";
@@ -374,13 +408,15 @@ export async function openChatBox(user) {
 
   chatSendBtn.addEventListener("click", SendMsg)
 
+  
   // You can add your sending message handler here if needed
-
+  
   chatInput.append(chatInputField, chatSendBtn);
-
+  
   // Assemble chat box
   chatBox.append(chatHeader, chatMessages, chatInput);
   document.body.appendChild(chatBox);
+  handle_typing();
 }
 
 function throttle(fn, limit) {

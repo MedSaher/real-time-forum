@@ -2,6 +2,7 @@ package hub
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 
 	"github.com/gorilla/websocket"
@@ -42,6 +43,7 @@ func (c *Client) ReadPump() {
 		if err != nil {
 			break
 		}
+		fmt.Println(string(msg))
 		c.Hub.Broadcast <- msg
 	}
 }

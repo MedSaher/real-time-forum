@@ -8,6 +8,10 @@ let worker = null;
 let port = null;
 // let userId
 
+export function sendMessage(message) {
+  worker.port.postMessage(message);
+}
+
 export async function renderHome() {
   document.body.innerHTML = ""; // Clear old page content
 
