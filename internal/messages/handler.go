@@ -2,6 +2,7 @@ package messages
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"real-time/internal/hub"
 	"strconv"
@@ -52,7 +53,8 @@ func (h *Handler) InsertMessage(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, "Internal Server error", http.StatusInternalServerError)
 				return
 			}
-			h.Hub.Broadcast <- data
+			receiver := h.Hub.Clients[Msg.RecieverId]
+			receiver.Send <- data
 
 		}
 	} else {

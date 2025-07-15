@@ -83,6 +83,8 @@ function connectWebSocketSharedWorker() {
           FetchPosts(); // refresh posts
           break;
         case "new_message":
+          console.log("new message");
+          
           if (openedChatId == message.data){
             RebuildMsgContainer(userOpened)
           } else {
