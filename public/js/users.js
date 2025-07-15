@@ -239,9 +239,11 @@ function handle_typing() {
     }
 
     if (!isTyping) {
+      console.log("typing to : ", String(userOpened.UserId));
+      
       sendMessage({
         type: "start_typing",
-        receiver: userOpened, 
+        receiver: String(userOpened.UserId), 
         content: "typing_status",
       });
       isTyping = true;
@@ -253,7 +255,7 @@ function handle_typing() {
       if (isTyping) {
         sendMessage({
           type: "stop_typing",
-          receiver: userOpened, 
+          receiver: String(userOpened.UserId), 
           content: "typing_status",
         });
         isTyping = false;

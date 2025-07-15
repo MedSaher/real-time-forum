@@ -15,6 +15,11 @@ type Client struct {
 	Hub    *Hub
 }
 
+type IncomingMessage struct {
+	Type        string `json:"type"`
+	ReceieverId string `json:"receiver"`
+}
+
 func (c *Client) ReadPump() {
 	defer func() {
 		c.Hub.Unregister <- c
@@ -39,17 +44,26 @@ func (c *Client) ReadPump() {
 		c.Conn.Close()
 	}()
 	for {
+
 		_, msg, err := c.Conn.ReadMessage()
 		if err != nil {
 			break
 		}
-		fmt.Println(string(msg))
+		var msgStruct IncomingMessage
+		json.Unmarshal(msg, &msgStruct)
+		if msgStruct.Type == "start_typing" || msgStruct.Type == "stop_typing" {
+			if c.Hub.Clients[msgStruct.ReceieverId] != nil {
+				c.Hub.Clients[msgStruct.ReceieverId].Send <- []byte(json.Marshal(msgStruct))
+			}
+			continue
+		}
 		c.Hub.Broadcast <- msg
 	}
 }
 
 func (c *Client) WritePump() {
 	for msg := range c.Send {
+		fmt.Println(string(msg))
 		err := c.Conn.WriteMessage(websocket.TextMessage, msg)
 		if err != nil {
 			c.Hub.Unregister <- c

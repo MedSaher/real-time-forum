@@ -74,7 +74,8 @@ func (h *Handler) WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 			log.Println("Failed to marshal message:", err)
 			return
 		}
-
+		h.hub.Mutex.Lock()
+		defer h.hub.Mutex.Unlock()
 		// Send to all clients *except* the newly connected one
 		for uid, cl := range h.hub.Clients {
 			// if newClientID == uid {

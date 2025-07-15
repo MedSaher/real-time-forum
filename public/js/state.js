@@ -90,6 +90,9 @@ function connectWebSocketSharedWorker() {
           } else {
             FetchUsers()
           }
+        case "start_typing":
+        case "stop_typing":
+          console.log(message.type);
       }
     };
 
