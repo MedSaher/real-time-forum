@@ -20,7 +20,7 @@ export async function FetchUsers() {
 
     if (usersResponse.ok) {
       const users = await usersResponse.json();
-      
+
       // Ensure notificationsResponse is an array before filtering
       const notifications = Array.isArray(notificationsResponse) ? notificationsResponse : [];
 
@@ -54,7 +54,7 @@ export async function FetchUsers() {
 }
 
 function renderUserList(users) {
-  
+
   const userList = document.querySelector(".user-list");
   userList.innerHTML = ""; // Clear existing content
 
@@ -167,10 +167,10 @@ function renderMessages(messages, chatMessagesContainer, user, { prepend = false
   // Always sort by ID ascending for consistent order
   messages.sort((a, b) => a.id - b.id);
 
-  if (prepend){
+  if (prepend) {
     messages.sort((a, b) => b.id - a.id);
   }
-  
+
 
   messages.forEach(msg => {
     const isSentByGuestUser = msg.SenderId === user.UserId;
@@ -238,12 +238,23 @@ function handle_typing() {
       return;
     }
 
+    window.addEventListener("beforeunload", function (e) {
+      if (isTyping) {
+        sendMessage({
+          type: "stop_typing",
+          receiver: String(userOpened.UserId),
+          content: "typing_status",
+        });
+        isTyping = false;
+      }
+    });
+
+
     if (!isTyping) {
-      console.log("typing to : ", String(userOpened.UserId));
-      
+
       sendMessage({
         type: "start_typing",
-        receiver: String(userOpened.UserId), 
+        receiver: String(userOpened.UserId),
         content: "typing_status",
       });
       isTyping = true;
@@ -255,7 +266,7 @@ function handle_typing() {
       if (isTyping) {
         sendMessage({
           type: "stop_typing",
-          receiver: String(userOpened.UserId), 
+          receiver: String(userOpened.UserId),
           content: "typing_status",
         });
         isTyping = false;
@@ -378,6 +389,19 @@ export async function openChatBox(user) {
 
   chatMessages.addEventListener("scroll", throttledScrollHandler);
 
+  // Typing indicator
+  const typingIndicator = document.createElement("div");
+  typingIndicator.className = "typing-indicator";
+  typingIndicator.innerText = `${user.Nickname} is typing...`;
+  typingIndicator.style.padding = "6px 16px";
+  typingIndicator.style.fontSize = "13px";
+  typingIndicator.style.fontStyle = "italic";
+  typingIndicator.style.color = "#666";
+  typingIndicator.style.display = "none"; // initially hidden
+  typingIndicator.style.backgroundColor = "#f0f0f0";
+  typingIndicator.style.borderTop = "1px solid #eee";
+  typingIndicator.style.borderBottom = "1px solid #eee";
+
 
 
   const chatInput = document.createElement("div");
@@ -410,13 +434,13 @@ export async function openChatBox(user) {
 
   chatSendBtn.addEventListener("click", SendMsg)
 
-  
+
   // You can add your sending message handler here if needed
-  
+
   chatInput.append(chatInputField, chatSendBtn);
-  
+
   // Assemble chat box
-  chatBox.append(chatHeader, chatMessages, chatInput);
+  chatBox.append(chatHeader, chatMessages, typingIndicator, chatInput);
   document.body.appendChild(chatBox);
   handle_typing();
 }
@@ -454,13 +478,13 @@ export async function RebuildMsgContainer(user) {
 
   if (!chatMessages) return; // Add a check to prevent errors if element doesn't exist
 
-    markAsRead(user);
+  markAsRead(user);
 
   // Initial load
   messageOffset = 0;
   const messages = await fetchChatHistory(user.UserId, messageOffset, 10);
   messageOffset += messages.length;
-  
+
 
   renderMessages(messages, chatMessages, user);
 
@@ -471,43 +495,43 @@ export async function RebuildMsgContainer(user) {
   });
 
   const throttledScrollHandler = throttle(async function () {
-  if (chatMessages.scrollTop === 0 && !loadingOldMessages && !allMessagesLoaded) {
-    loadingOldMessages = true;
+    if (chatMessages.scrollTop === 0 && !loadingOldMessages && !allMessagesLoaded) {
+      loadingOldMessages = true;
 
-    const previousHeight = chatMessages.scrollHeight;
+      const previousHeight = chatMessages.scrollHeight;
 
-    const moreMessages = await fetchChatHistory(user.UserId, messageOffset, 10);
+      const moreMessages = await fetchChatHistory(user.UserId, messageOffset, 10);
 
-    if (moreMessages.length === 0) {
-      allMessagesLoaded = true;
+      if (moreMessages.length === 0) {
+        allMessagesLoaded = true;
+        loadingOldMessages = false;
+        return;
+      }
+
+      // Check if we already have these messages
+      const existingIds = Array.from(chatMessages.querySelectorAll('.msg-wrapper'))
+        .map(el => el.dataset.messageId);
+      const newMessages = moreMessages.filter(msg =>
+        !existingIds.includes(String(msg.id))
+      );
+
+      if (newMessages.length === 0) {
+        allMessagesLoaded = true;
+        loadingOldMessages = false;
+        return;
+      }
+
+      messageOffset += newMessages.length;
+      renderMessages(newMessages, chatMessages, user, { prepend: true });
+
+      // Maintain scroll position
+      requestAnimationFrame(() => {
+        chatMessages.scrollTop = chatMessages.scrollHeight - previousHeight;
+      });
+
       loadingOldMessages = false;
-      return;
     }
-
-    // Check if we already have these messages
-    const existingIds = Array.from(chatMessages.querySelectorAll('.msg-wrapper'))
-      .map(el => el.dataset.messageId);
-    const newMessages = moreMessages.filter(msg => 
-      !existingIds.includes(String(msg.id))
-    );
-
-    if (newMessages.length === 0) {
-      allMessagesLoaded = true;
-      loadingOldMessages = false;
-      return;
-    }
-
-    messageOffset += newMessages.length;
-    renderMessages(newMessages, chatMessages, user, { prepend: true });
-
-    // Maintain scroll position
-    requestAnimationFrame(() => {
-      chatMessages.scrollTop = chatMessages.scrollHeight - previousHeight;
-    });
-
-    loadingOldMessages = false;
-  }
-}, 400);
+  }, 400);
   chatMessages.addEventListener("scroll", throttledScrollHandler);
 }
 
@@ -579,5 +603,16 @@ async function markAsRead(user) {
   } catch (error) {
     BuildErrorPage(500, "Internal Server Error")
     console.error("Error marking messages as read:", error);
+  }
+}
+
+export function toggleTyping(messageType){
+  const typingIndicator = document.querySelector(".typing-indicator")
+  if (openedChatId > 0){
+    if (messageType === "start_typing"){
+      typingIndicator.style.display = "block"
+    } else {
+      typingIndicator.style.display = "none"
+    }
   }
 }

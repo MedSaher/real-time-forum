@@ -53,7 +53,11 @@ func (c *Client) ReadPump() {
 		json.Unmarshal(msg, &msgStruct)
 		if msgStruct.Type == "start_typing" || msgStruct.Type == "stop_typing" {
 			if c.Hub.Clients[msgStruct.ReceieverId] != nil {
-				c.Hub.Clients[msgStruct.ReceieverId].Send <- []byte(json.Marshal(msgStruct))
+				data, err := json.Marshal(msgStruct)
+				if err != nil {
+					continue
+				}
+				c.Hub.Clients[msgStruct.ReceieverId].Send <- data
 			}
 			continue
 		}

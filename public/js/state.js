@@ -1,7 +1,7 @@
 // views.js
 import { BuildLoginPage } from "/public/js/login.js";
 import { BuildMainPage, CreatePostDOM, FetchPosts } from "/public/js/post.js";
-import { FetchUsers, BuildProfile, openedChatId, RebuildMsgContainer, userOpened } from "/public/js/users.js";
+import { FetchUsers, BuildProfile, openedChatId, RebuildMsgContainer, userOpened, toggleTyping } from "/public/js/users.js";
 import { InitCommentModal } from "/public/js/comment.js";
 
 let worker = null;
@@ -92,7 +92,7 @@ function connectWebSocketSharedWorker() {
           }
         case "start_typing":
         case "stop_typing":
-          console.log(message.type);
+          toggleTyping(message.type);
       }
     };
 
